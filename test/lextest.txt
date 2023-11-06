@@ -1,0 +1,7 @@
+int a = 10, c = 20, d[1][2] = {};
+const float f = 0.2;
+int arr[2] = {1, 2, {1, 2}, {1, 2, {1}}};
+
+int main(int x) {
+  int r = 10;
+}
