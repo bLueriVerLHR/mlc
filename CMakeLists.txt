@@ -9,9 +9,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED On)
 set(PROJECT_PATH project)
 set(SRC_PATH ${PROJECT_PATH}/src)
 set(INC_PATH ${PROJECT_PATH}/include)
-set(PSR_PATH ${PROJECT_PATH}/src/parser)
 
 add_compile_options(-g)
+
 if(${MANUAL})
     add_compile_options(-g -fsanitize=address -mllvm -asan-detect-invalid-pointer-pair=true)
     add_link_options(-fsanitize=address)

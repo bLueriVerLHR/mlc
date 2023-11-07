@@ -73,15 +73,17 @@ static inline void parse_command_line_arguments(int argc, char **argv) {
 int main(int argc, char **argv) {
   parse_command_line_arguments(argc, argv);
 
-  if (int code = prepare_sem_ast_generator(); code != 0)
+  if (int code = sem::prepare(); code != 0)
     exit(EXIT_FAILURE);
 
   for (const char *path : config.input_file_paths) {
-    if (int code = parse_file(path); code != 0)
+    if (int code = sem::parse_file(path); code != 0)
       exit(EXIT_FAILURE);
   }
 
-  if (int code = destroy_sem_ast_generator(); code != 0)
+  sem::pass();
+
+  if (int code = sem::destroy(); code != 0)
     exit(EXIT_FAILURE);
 
   return 0;
