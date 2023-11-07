@@ -21,7 +21,11 @@ $(shell mkdir -p $(PROJECT_BUILD_DIR))
 all: build
 
 build:
-	cmake -S . -B $(PROJECT_BUILD_DIR)
+	cmake -S . -B $(PROJECT_BUILD_DIR) \
+		-DMANUAL=ON \
+		-DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE \
+		-DCMAKE_C_COMPILER:FILEPATH=`which clang` \
+		-DCMAKE_CXX_COMPILER:FILEPATH=`which clang++`
 	cmake --build $(PROJECT_BUILD_DIR) -j$(NPROC)
 
 .ONESHELL:

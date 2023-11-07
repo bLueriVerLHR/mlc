@@ -73,8 +73,6 @@ typedef void *yyscan_t;
 %type <type_qualifier> type_qualifier
 %type <type_specifier> type_specifier
 
-%type <identifier> identifier
-%type <constant> constant
 %type <init_list> initializer initializer_list
 %type <left_value> left_value
 
@@ -182,7 +180,7 @@ declarator:
   {
     $$->add_dimension($3);
   }
-  | identifier
+  | LEX_IDENTIFIER
   {
     $$ = new sem_declaration($1);
   }
@@ -193,12 +191,12 @@ param_declarator:
   {
     $$->add_dimension($3);
   }
-  | identifier '[' ']'
+  | LEX_IDENTIFIER '[' ']'
   {
     $$ = new sem_param_declaration($1);
     $$->set_is_pointer();
   }
-  | identifier
+  | LEX_IDENTIFIER
   {
     $$ = new sem_param_declaration($1);
   }
@@ -235,11 +233,11 @@ initializer_list:
   ;
 
 function_definition:
-    type_qualifier type_specifier identifier '(' function_fake_params ')' block
+    type_qualifier type_specifier LEX_IDENTIFIER '(' function_fake_params ')' block
   {
     $$ = new sem_function_definition($1, $2, $3, $5, $7);
   }
-  | type_qualifier type_specifier identifier '(' ')' block
+  | type_qualifier type_specifier LEX_IDENTIFIER '(' ')' block
   {
     $$ = new sem_function_definition($1, $2, $3, nullptr, $6);
   }
@@ -470,7 +468,11 @@ unary_expression:
   {
     $$ = $1;
   }
-  | identifier '(' function_real_params ')'
+  | LEX_IDENTIFIER '(' ')'
+  {
+    $$ = new sem_function_call($1, nullptr);
+  }
+  | LEX_IDENTIFIER '(' function_real_params ')'
   {
     $$ = new sem_function_call($1, $3);
   }
@@ -497,14 +499,14 @@ primary_expression:
   {
     $$ = new sem_arith_left_value($1);
   }
-  | constant
+  | LEX_CONSTANT
   {
     $$ = new sem_arith_constant($1);
   }
   ;
 
 left_value:
-    identifier
+    LEX_IDENTIFIER
   {
     $$ = new sem_left_value($1);
   }
@@ -519,6 +521,7 @@ function_real_params:
     expression
   {
     $$ = new std::list<sem_expression *>;
+    $$->push_back($1);
   }
   | function_real_params ',' expression
   {
@@ -550,20 +553,6 @@ type_qualifier:
   | LEX_CONST
   {
     $$ = SEM_TYPE_QUALIFIER::CONST;
-  }
-  ;
-
-constant:
-    LEX_CONSTANT
-  {
-    $$ = $1;
-  }
-  ;
-
-identifier:
-    LEX_IDENTIFIER
-  {
-    $$ = $1;
   }
   ;
 

@@ -3,7 +3,7 @@
 #include <cstdlib>
 #include <cstring>
 
-sem_identifier::sem_identifier(const char *text) : name_(strdup(text)) {}
+sem_identifier::sem_identifier(const char *text) : name_(nullptr) { name_ = strdup(text); }
 
 sem_identifier::~sem_identifier() { free((void *)name_); }
 

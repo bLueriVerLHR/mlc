@@ -173,7 +173,7 @@ void sem_param_declaration::add_dimension(sem_expression *expression) {
   if (dims_ == nullptr) {
     dims_ = new std::list<sem_expression *>;
   }
-  dims_->push_front(expression);
+  dims_->push_back(expression);
 }
 
 std::string sem_param_declaration::to_string() const {
@@ -361,7 +361,7 @@ void sem_left_value::add_dimension(sem_expression *expression) {
   if (dims_ == nullptr) {
     dims_ = new std::list<sem_expression *>;
   }
-  dims_->push_front(expression);
+  dims_->push_back(expression);
 }
 
 std::string sem_left_value::to_string() const {
