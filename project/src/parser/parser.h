@@ -95,14 +95,15 @@ union YYSTYPE
 {
 #line 35 "parser.y"
 
-  TYPE_SPECIFIER type_specifier;
-  TYPE_QUALIFIER type_qualifier;
+  SEM_TYPE_SPECIFIER type_specifier;
+  SEM_TYPE_QUALIFIER type_qualifier;
 
   sem_constant *constant;
   sem_identifier *identifier;
   sem_init_list *init_list;
+  sem_left_value *left_value;
 
-  sem_block *block;
+  sem_region *block;
   sem_operation *operation;
     sem_expression *expression;
     sem_declaration *declaration;
@@ -110,10 +111,11 @@ union YYSTYPE
     sem_function_definition *function_definition;
 
   std::list<sem_operation *> *operations;
+  std::list<sem_expression *> *expressions;
   std::list<sem_declaration *> *declarations;
   std::list<sem_param_declaration *> *param_declarations;
 
-#line 117 "parser.h"
+#line 119 "parser.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

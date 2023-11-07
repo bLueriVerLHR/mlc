@@ -1,12 +1,12 @@
 #include "ast_def.h"
 
-void sem_block::add_operation(sem_operation *operation) {
+void sem_region::add_operation(sem_operation *operation) {
   if (operation == nullptr)
     return;
   operations_.push_back(operation);
 }
 
-sem_block::~sem_block() {
+sem_region::~sem_region() {
   for (sem_operation *&operation : operations_) {
     if (operation == nullptr)
       continue;
@@ -16,8 +16,12 @@ sem_block::~sem_block() {
   }
 }
 
-std::string sem_block::to_string() const {
+std::string sem_region::to_string() const {
   static size_t block_print_indent = 0;
+
+  if (operations_.empty()) {
+    return std::string("{}");
+  }
 
   block_print_indent += 1;
   std::string indent = "\n";

@@ -16,17 +16,22 @@ TEST_CASE	?= fb
 
 $(shell mkdir -p $(PROJECT_BUILD_DIR))
 
+.PHONY: all build parser clean run
+
 all: build
 
-build: $(PROJECT_SRC) $(PROJECT_INC) parser
+build:
 	cmake -S . -B $(PROJECT_BUILD_DIR)
 	cmake --build $(PROJECT_BUILD_DIR) -j$(NPROC)
 
-parser: $(PROJECT_PARSER)
-	cd project/src/parser && flex lexer.l && bison parser.y
+.ONESHELL:
+parser: 
+	cd project/src/parser
+	flex lexer.l
+	bison parser.y # -Wcounterexamples
 
 clean:
 	rm -r $(PROJECT_BUILD_DIR)
 
 run: build
-	$(BINARY) $(TEST_DIR)/$(TEST_CASE).txt
+	$(BINARY) $(TEST_DIR)/$(TEST_CASE).sy

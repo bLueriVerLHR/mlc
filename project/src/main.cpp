@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-sem_block *sem_ast;
+sem_region *sem_ast;
 
 int main(int argc, char *argv[]) {
   if (argc < 2) {
@@ -30,6 +30,7 @@ int main(int argc, char *argv[]) {
     exit(EXIT_FAILURE);
   }
   YY_BUFFER_STATE state = yy_scan_string(buf, scanner);
+
   if (yyparse(scanner) != 0) {
     exit(EXIT_FAILURE);
   }

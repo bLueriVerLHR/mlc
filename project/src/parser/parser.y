@@ -33,14 +33,15 @@ typedef void *yyscan_t;
 %parse-param { yyscan_t scanner }
 
 %union {
-  TYPE_SPECIFIER type_specifier;
-  TYPE_QUALIFIER type_qualifier;
+  SEM_TYPE_SPECIFIER type_specifier;
+  SEM_TYPE_QUALIFIER type_qualifier;
 
   sem_constant *constant;
   sem_identifier *identifier;
   sem_init_list *init_list;
+  sem_left_value *left_value;
 
-  sem_block *block;
+  sem_region *block;
   sem_operation *operation;
     sem_expression *expression;
     sem_declaration *declaration;
@@ -48,6 +49,7 @@ typedef void *yyscan_t;
     sem_function_definition *function_definition;
 
   std::list<sem_operation *> *operations;
+  std::list<sem_expression *> *expressions;
   std::list<sem_declaration *> *declarations;
   std::list<sem_param_declaration *> *param_declarations;
 }
@@ -74,6 +76,7 @@ typedef void *yyscan_t;
 %type <identifier> identifier
 %type <constant> constant
 %type <init_list> initializer initializer_list
+%type <left_value> left_value
 
 %type <block> translation_unit block block_items
 %type <operation> statement
@@ -90,6 +93,7 @@ typedef void *yyscan_t;
 
 %type <declarations> variable_definitions declaration
 %type <param_declarations> function_fake_params
+%type <expressions> function_real_params
 
 %start top_scope
 
@@ -105,7 +109,7 @@ top_scope:
 translation_unit:
     declaration
   {
-    $$ = new sem_block;
+    $$ = new sem_region;
     std::list<sem_declaration *> &decls = *$1;
     for (sem_declaration *&decl : decls) {
       decl->set_is_global();
@@ -127,7 +131,7 @@ translation_unit:
   }
   | function_definition
   {
-    $$ = new sem_block;
+    $$ = new sem_region;
     $$->add_operation($1);
   }
   | translation_unit function_definition
@@ -235,6 +239,10 @@ function_definition:
   {
     $$ = new sem_function_definition($1, $2, $3, $5, $7);
   }
+  | type_qualifier type_specifier identifier '(' ')' block
+  {
+    $$ = new sem_function_definition($1, $2, $3, nullptr, $6);
+  }
   ;
 
 function_fake_params:
@@ -263,12 +271,16 @@ block:
   {
     $$ = $2;
   }
+  | '{' '}'
+  {
+    $$ = new sem_region;
+  }
   ;
 
 block_items:
     statement
   {
-    $$ = new sem_block;
+    $$ = new sem_region;
     $$->add_operation($1);
   }
   | block_items statement
@@ -278,7 +290,7 @@ block_items:
   }
   | declaration
   {
-    $$ = new sem_block;
+    $$ = new sem_region;
     std::list<sem_declaration *> &decls = *$1;
     for (sem_declaration *&decl : decls) {
       $$->add_operation(decl);
@@ -307,37 +319,41 @@ statement:
   {
     $$ = $1;
   }
+  | left_value '=' expression ';'
+  {
+    $$ = new sem_assignment($1, $3);
+  }
   | block
   {
-    $$ = nullptr;
+    $$ = new sem_plain_block($1);
   }
   | LEX_IF '(' condition ')' statement
   {
-    $$ = nullptr;
+    $$ = new sem_branch($3, $5);
   }
   | LEX_IF '(' condition ')' statement LEX_ELSE statement
   {
-    $$ = nullptr;
+    $$ = new sem_branch($3, $5, $7);
   }
   | LEX_WHILE '(' condition ')' statement
   {
-    $$ = nullptr;
+    $$ = new sem_loop($3, $5);
   }
   | LEX_BREAK ';'
   {
-    $$ = nullptr;
+    $$ = new sem_break;
   }
   | LEX_CONTINUE ';'
   {
-    $$ = nullptr;
+    $$ = new sem_continue;
   }
   | LEX_RETURN ';'
   {
-    $$ = nullptr;
+    $$ = new sem_return;
   }
   | LEX_RETURN expression ';'
   {
-    $$ = nullptr;
+    $$ = new sem_return($2);
   }
   ;
 
@@ -362,7 +378,7 @@ lor_expression:
   }
   | lor_expression LEX_LOR land_expression
   {
-
+    $$ = new sem_arith_binary(SEM_ARITH_BINARY::LOR, $1, $3);
   }
   ;
 
@@ -373,7 +389,7 @@ land_expression:
   }
   | land_expression LEX_LAND equ_expression
   {
-
+    $$ = new sem_arith_binary(SEM_ARITH_BINARY::LAND, $1, $3);
   }
   ;
 
@@ -384,11 +400,11 @@ equ_expression:
   }
   | equ_expression LEX_EQU rel_expression
   {
-
+    $$ = new sem_arith_binary(SEM_ARITH_BINARY::EQU, $1, $3);
   }
   | equ_expression LEX_NEQ rel_expression
   {
-
+    $$ = new sem_arith_binary(SEM_ARITH_BINARY::NEQ, $1, $3);
   }
   ;
 
@@ -399,19 +415,19 @@ rel_expression:
   }
   | rel_expression LEX_GEQ add_expression
   {
-    
+    $$ = new sem_arith_binary(SEM_ARITH_BINARY::GEQ, $1, $3);
   }
   | rel_expression LEX_LEQ add_expression
   {
-    
+    $$ = new sem_arith_binary(SEM_ARITH_BINARY::LEQ, $1, $3);
   }
   | rel_expression '>' add_expression
   {
-    
+    $$ = new sem_arith_binary(SEM_ARITH_BINARY::GTH, $1, $3);
   }
   | rel_expression '<' add_expression
   {
-    
+    $$ = new sem_arith_binary(SEM_ARITH_BINARY::LTH, $1, $3);
   }
   ;
 
@@ -422,11 +438,11 @@ add_expression:
   }
   | add_expression '+' mul_expression
   {
-    
+    $$ = new sem_arith_binary(SEM_ARITH_BINARY::ADD, $1, $3);
   }
   | add_expression '-' mul_expression
   {
-    
+    $$ = new sem_arith_binary(SEM_ARITH_BINARY::SUB, $1, $3);
   }
   ;
 
@@ -437,15 +453,15 @@ mul_expression:
   }
   | unary_expression '*' mul_expression
   {
-    
+    $$ = new sem_arith_binary(SEM_ARITH_BINARY::MUL, $1, $3);
   }
   | unary_expression '/' mul_expression
   {
-    
+    $$ = new sem_arith_binary(SEM_ARITH_BINARY::DIV, $1, $3);
   }
   | unary_expression '%' mul_expression
   {
-    
+    $$ = new sem_arith_binary(SEM_ARITH_BINARY::MOD, $1, $3);
   }
   ;
 
@@ -456,7 +472,7 @@ unary_expression:
   }
   | identifier '(' function_real_params ')'
   {
-    $$ = nullptr;
+    $$ = new sem_function_call($1, $3);
   }
   | '+' unary_expression
   {
@@ -464,11 +480,11 @@ unary_expression:
   }
   | '-' unary_expression
   {
-    $$ = nullptr;
+    $$ = new sem_arith_unary(SEM_ARITH_UNARY::NEG, $2);
   }
   | '!' unary_expression
   {
-    $$ = nullptr;
+    $$ = new sem_arith_unary(SEM_ARITH_UNARY::LNOT, $2);
   }
   ;
 
@@ -479,7 +495,7 @@ primary_expression:
   }
   | left_value
   {
-    
+    $$ = new sem_arith_left_value($1);
   }
   | constant
   {
@@ -490,57 +506,65 @@ primary_expression:
 left_value:
     identifier
   {
-    
+    $$ = new sem_left_value($1);
   }
   | left_value '[' expression ']'
   {
-    
+    $$ = $1;
+    $$->add_dimension($3);
   }
   ;
 
 function_real_params:
     expression
   {
-    
+    $$ = new std::list<sem_expression *>;
   }
-  | function_real_params expression
+  | function_real_params ',' expression
   {
-    
+    $$ = $1;
+    $$->push_back($3);
   }
   ;
 
 type_specifier:
     LEX_INT
   {
-    $$ = TYPE_SPECIFIER::INT;
+    $$ = SEM_TYPE_SPECIFIER::INT;
   }
   | LEX_FLOAT
   {
-    $$ = TYPE_SPECIFIER::FLOAT;
+    $$ = SEM_TYPE_SPECIFIER::FLOAT;
   }
   | LEX_VOID
   {
-    $$ = TYPE_SPECIFIER::VOID;
+    $$ = SEM_TYPE_SPECIFIER::VOID;
   }
   ;
 
 type_qualifier:
     %empty
   {
-    $$ = TYPE_QUALIFIER::UNDEFINED;
+    $$ = SEM_TYPE_QUALIFIER::UNDEFINED;
   }
   | LEX_CONST
   {
-    $$ = TYPE_QUALIFIER::CONST;
+    $$ = SEM_TYPE_QUALIFIER::CONST;
   }
   ;
 
 constant:
     LEX_CONSTANT
+  {
+    $$ = $1;
+  }
   ;
 
 identifier:
     LEX_IDENTIFIER
+  {
+    $$ = $1;
+  }
   ;
 
 %%
