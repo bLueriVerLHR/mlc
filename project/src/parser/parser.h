@@ -47,6 +47,7 @@ extern int yydebug;
 /* "%code requires" blocks.  */
 #line 15 "parser.y"
 
+#include <list>
 #include "ast_def.h"
 
 #ifndef YY_TYPEDEF_YY_SCANNER_T
@@ -55,7 +56,7 @@ typedef void *yyscan_t;
 #endif
 
 
-#line 59 "parser.h"
+#line 60 "parser.h"
 
 /* Token kinds.  */
 #ifndef YYTOKENTYPE
@@ -92,24 +93,27 @@ typedef void *yyscan_t;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 34 "parser.y"
-
-  sem_constant *constant;
-  sem_identifier *identifier;
-  sem_operation *operation;
-  sem_block *block;
+#line 35 "parser.y"
 
   TYPE_SPECIFIER type_specifier;
   TYPE_QUALIFIER type_qualifier;
 
-  sem_expression *expression;
-  sem_declarator *declarator;
+  sem_constant *constant;
+  sem_identifier *identifier;
   sem_init_list *init_list;
 
-  sem_function_definition *function_definition;
-  sem_param_declarator *param_declarator;
+  sem_block *block;
+  sem_operation *operation;
+    sem_expression *expression;
+    sem_declaration *declaration;
+    sem_param_declaration *param_declaration;
+    sem_function_definition *function_definition;
 
-#line 113 "parser.h"
+  std::list<sem_operation *> *operations;
+  std::list<sem_declaration *> *declarations;
+  std::list<sem_param_declaration *> *param_declarations;
+
+#line 117 "parser.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

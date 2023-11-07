@@ -1,3 +1,0 @@
-/home/blur/code/mlc/build/CMakeFiles/mlc.dir
-/home/blur/code/mlc/build/CMakeFiles/edit_cache.dir
-/home/blur/code/mlc/build/CMakeFiles/rebuild_cache.dir

@@ -22,9 +22,9 @@ enum class TYPE_QUALIFIER {
 static inline const char *qualifier_to_cstring(TYPE_QUALIFIER qualifier) {
   switch (qualifier) {
   case TYPE_QUALIFIER::UNDEFINED:
-    return "meta.type.qualifier.undefined";
+    return "undefined";
   case TYPE_QUALIFIER::CONST:
-    return "meta.type.qualifier.const";
+    return "const";
   }
   return "unknow";
 }
@@ -39,13 +39,13 @@ enum class TYPE_SPECIFIER {
 static inline const char *specifier_to_cstring(TYPE_SPECIFIER qualifier) {
   switch (qualifier) {
   case TYPE_SPECIFIER::UNDEFINED:
-    return "meta.type.specifier.undefined";
+    return "undefined";
   case TYPE_SPECIFIER::INT:
-    return "meta.type.specifier.int";
+    return "int";
   case TYPE_SPECIFIER::FLOAT:
-    return "meta.type.specifier.float";
+    return "float";
   case TYPE_SPECIFIER::VOID:
-    return "meta.type.specifier.void";
+    return "void";
   }
   return "unknow";
 }
@@ -61,7 +61,7 @@ enum class EXPR_OPERATOR {
   MULTIPLICATION,
   DIVISION,
   MODULO,
-  
+
   LOGIC_AND,
   LOGIC_OR,
   LOGIC_NOT,
@@ -105,7 +105,7 @@ public:
   sem_operation() = default;
   virtual ~sem_operation() = default;
 
-  virtual std::string to_string() const;
+  virtual std::string to_string() const = 0;
 };
 
 class sem_block {
@@ -121,13 +121,11 @@ public:
 };
 
 class sem_expression : public sem_operation {
-  sem_constant *constant_;
-
 public:
-  sem_expression(sem_constant *constant);
-  virtual ~sem_expression();
+  sem_expression() = default;
+  virtual ~sem_expression() = default;
 
-  std::string to_string() const;
+  std::string to_string() const = 0;
 };
 
 class sem_init_list {
@@ -146,44 +144,38 @@ public:
   std::string to_string() const;
 };
 
-class sem_declarator : public sem_operation {
+class sem_declaration : public sem_operation {
+  TYPE_QUALIFIER qualifier_;
+  TYPE_SPECIFIER specifier_;
   sem_identifier *identifier_;
-  std::list<sem_expression *> dims_;
+  std::list<sem_expression *> *dims_;
   sem_init_list *init_list_;
 
-public:
-  sem_declarator(sem_identifier *identifier);
-  virtual ~sem_declarator();
+  bool is_global_;
 
+public:
+  sem_declaration(sem_identifier *identifier);
+  virtual ~sem_declaration();
+
+  void set_type_info(TYPE_QUALIFIER qualifier, TYPE_SPECIFIER specifier);
   void set_init_list(sem_init_list *init_list);
+  void set_is_global();
   void add_dimension(sem_expression *expression);
 
   std::string to_string() const;
 };
 
-class sem_declaration : public sem_operation {
-  TYPE_QUALIFIER qualifier_;
-  TYPE_SPECIFIER specifier_;
-  sem_block *declarators_;
-
-public:
-  sem_declaration(TYPE_QUALIFIER qualifier, TYPE_SPECIFIER specifier, sem_block *declarators);
-  virtual ~sem_declaration();
-
-  std::string to_string() const;
-};
-
-class sem_param_declarator : public sem_operation {
+class sem_param_declaration {
   TYPE_QUALIFIER qualifier_;
   TYPE_SPECIFIER specifier_;
   sem_identifier *identifier_;
-  std::list<sem_expression *> dims_;
+  std::list<sem_expression *> *dims_;
 
   bool is_pointer_;
 
 public:
-  sem_param_declarator(sem_identifier *identifier);
-  virtual ~sem_param_declarator();
+  sem_param_declaration(sem_identifier *identifier);
+  virtual ~sem_param_declaration();
 
   void set_type_info(TYPE_QUALIFIER qualifier, TYPE_SPECIFIER specifier);
   void set_is_pointer();
@@ -196,37 +188,28 @@ class sem_function_definition : public sem_operation {
   TYPE_QUALIFIER qualifier_;
   TYPE_SPECIFIER specifier_;
   sem_identifier *identifier_;
-  sem_block *fake_params_;
+  std::list<sem_param_declaration *> *fake_params_;
   sem_block *body_;
 
 public:
   sem_function_definition(TYPE_QUALIFIER qualifier, TYPE_SPECIFIER specifier, sem_identifier *identifier,
-                           sem_block *fake_params, sem_block *body);
+                          std::list<sem_param_declaration *> *fake_params, sem_block *body);
   virtual ~sem_function_definition();
 
   std::string to_string() const;
 };
 
-class sem_simple_embedding : public sem_operation {
-  sem_block *block_;
-
-public:
-  sem_simple_embedding(sem_block *block);
-  virtual ~sem_simple_embedding();
-
-  std::string to_string() const;
-};
-
-class sem_branch : public sem_operation {
-  sem_expression *condition_;
-  sem_operation *on_true_;
-  sem_operation *on_false_;
-
-public:
-  sem_branch(sem_operation *condition, sem_operation *on_true, sem_operation *on_false);
-  virtual ~sem_branch();
-
-  std::string to_string() const;
-};
-
 extern sem_block *sem_ast;
+
+/* expressions */
+
+class sem_arith_constant : public sem_expression {
+  sem_constant *constant_;
+
+public:
+  sem_arith_constant(sem_constant *constant);
+  virtual ~sem_arith_constant();
+
+  std::string to_string() const;
+};
+

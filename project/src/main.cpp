@@ -38,6 +38,6 @@ int main(int argc, char *argv[]) {
 
   free(buf);
 
-  std::cout << sem_ast->to_string() << std::endl;
+  std::cout << "top " << sem_ast->to_string() << std::endl;
   return 0;
 }

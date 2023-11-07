@@ -1,18 +1,5 @@
 #include "ast_def.h"
 
-std::string sem_operation::to_string() const { return "meta.unimplemented()"; }
-
-sem_expression::sem_expression(sem_constant *constant) : constant_(constant) {}
-
-sem_expression::~sem_expression() {
-  if (constant_ != nullptr) {
-    delete constant_;
-    constant_ = nullptr;
-  }
-}
-
-std::string sem_expression::to_string() const { return constant_->to_string(); }
-
 sem_init_list::sem_init_list() : is_expression_(false), expression_(nullptr), init_list_() {}
 
 sem_init_list::sem_init_list(sem_expression *expression)
@@ -43,125 +30,184 @@ std::string sem_init_list::to_string() const {
   if (is_expression_) {
     return expression_->to_string();
   }
-
-  std::string out = "{ ";
-  for (sem_init_list *const &init_list : init_list_) {
-    out += init_list->to_string() + ", ";
+  if (init_list_.empty()) {
+    return std::string("[]");
   }
-  out += "}";
+
+  std::string out = "[";
+  std::list<sem_init_list *>::const_iterator it = init_list_.begin();
+  out += (*it)->to_string();
+  for (++it; it != init_list_.end(); ++it) {
+    out += ", " + (*it)->to_string();
+  }
+  out += "]";
 
   return out;
 }
 
-sem_declarator::sem_declarator(sem_identifier *identifier) : identifier_(identifier), dims_(), init_list_(nullptr) {}
+sem_declaration::sem_declaration(sem_identifier *identifier)
+    : qualifier_(TYPE_QUALIFIER::UNDEFINED), specifier_(TYPE_SPECIFIER::UNDEFINED), identifier_(identifier),
+      dims_(nullptr), init_list_(nullptr), is_global_(false) {}
 
-sem_declarator::~sem_declarator() {
+sem_declaration::~sem_declaration() {
   if (identifier_ != nullptr) {
     delete identifier_;
     identifier_ = nullptr;
   }
-
-  for (sem_expression *&dim : dims_) {
-    if (dim == nullptr)
-      continue;
-
-    delete dim;
-    dim = nullptr;
+  if (dims_ != nullptr) {
+    std::list<sem_expression *> &vdim = *dims_;
+    for (sem_expression *&dim : vdim) {
+      if (dim != nullptr) {
+        delete dim;
+        dim = nullptr;
+      }
+    }
+    delete dims_;
+    dims_ = nullptr;
   }
-
   if (init_list_ != nullptr) {
     delete init_list_;
     init_list_ = nullptr;
   }
 }
 
-void sem_declarator::set_init_list(sem_init_list *init_list) { init_list_ = init_list; }
+void sem_declaration::set_type_info(TYPE_QUALIFIER qualifier, TYPE_SPECIFIER specifier) {
+  qualifier_ = qualifier;
+  specifier_ = specifier;
 
-void sem_declarator::add_dimension(sem_expression *expression) { dims_.push_front(expression); }
+  if (init_list_ == nullptr) {
+    SEM_CONSTANT_TYPE sct = SEM_CONSTANT_TYPE::ERROR;
 
-std::string sem_declarator::to_string() const {
-  std::string out = "meta.declarator(";
-  out += identifier_->to_string() + ", ";
-  out += "[";
-  for (sem_expression *const &dim : dims_) {
-    out += dim->to_string() + ", ";
+    switch (specifier_) {
+    case TYPE_SPECIFIER::INT:
+      sct = SEM_CONSTANT_TYPE::DECIMAL_INTEGER;
+      break;
+    case TYPE_SPECIFIER::FLOAT:
+      sct = SEM_CONSTANT_TYPE::DECIMAL_FLOAT;
+      break;
+    default:
+      break;
+    }
+
+    sem_constant *dummy = new sem_constant(sct);
+    sem_expression *expr = new sem_arith_constant(dummy);
+    init_list_ = new sem_init_list(expr);
   }
-  out += "], ";
-  out += init_list_->to_string();
-  out += ")";
-
-  return out;
 }
 
-sem_declaration::sem_declaration(TYPE_QUALIFIER qualifier, TYPE_SPECIFIER specifier, sem_block *declarators)
-    : qualifier_(qualifier), specifier_(specifier), declarators_(declarators) {}
+void sem_declaration::set_init_list(sem_init_list *init_list) { init_list_ = init_list; }
 
-sem_declaration::~sem_declaration() {
-  if (declarators_ != nullptr) {
-    delete declarators_;
-    declarators_ = nullptr;
+void sem_declaration::set_is_global() { is_global_ = true; }
+
+void sem_declaration::add_dimension(sem_expression *expression) {
+  if (dims_ == nullptr) {
+    dims_ = new std::list<sem_expression *>;
   }
+
+  dims_->push_back(expression);
 }
 
 std::string sem_declaration::to_string() const {
-  std::string out = "meta.declaraions(";
-  out += qualifier_to_cstring(qualifier_);
-  out += ", ";
+  std::string out = (is_global_ ? "@" : "%") + identifier_->to_string();
+
+  if (init_list_ != nullptr) {
+    out += " = ";
+    if (dims_ == nullptr or dims_->empty()) {
+      out += "arith.constant";
+    } else {
+      out += "arith.initializer";
+    }
+    out += " ";
+    out += init_list_->to_string();
+  }
+
+  out += " : ";
+  if (qualifier_ != TYPE_QUALIFIER::UNDEFINED) {
+    out += qualifier_to_cstring(qualifier_);
+    out += " ";
+  }
   out += specifier_to_cstring(specifier_);
-  out += ", ";
-  out += declarators_->to_string() + ")";
+
+  if (dims_ != nullptr and not dims_->empty()) {
+    out += '[';
+    std::list<sem_expression *>::iterator it = dims_->begin();
+    out += (*it)->to_string();
+    for (++it; it != dims_->end(); ++it) {
+      out += "x" + (*it)->to_string();
+    }
+    out += ']';
+  }
 
   return out;
 }
 
-sem_param_declarator::sem_param_declarator(sem_identifier *identifier)
-    : qualifier_(TYPE_QUALIFIER::UNDEFINED), specifier_(TYPE_SPECIFIER::UNDEFINED), identifier_(identifier), dims_(),
-      is_pointer_(false) {}
+sem_param_declaration::sem_param_declaration(sem_identifier *identifier)
+    : qualifier_(TYPE_QUALIFIER::UNDEFINED), specifier_(TYPE_SPECIFIER::UNDEFINED), identifier_(identifier),
+      dims_(nullptr), is_pointer_(false) {}
 
-sem_param_declarator::~sem_param_declarator() {
+sem_param_declaration::~sem_param_declaration() {
   if (identifier_ != nullptr) {
     delete identifier_;
     identifier_ = nullptr;
   }
 
-  for (sem_expression *&dim : dims_) {
-    if (dim == nullptr)
-      continue;
-
-    delete dim;
-    dim = nullptr;
+  if (dims_ != nullptr) {
+    std::list<sem_expression *> &vdim = *dims_;
+    for (sem_expression *&dim : vdim) {
+      if (dim != nullptr) {
+        delete dim;
+        dim = nullptr;
+      }
+    }
+    delete dims_;
+    dims_ = nullptr;
   }
 }
 
-void sem_param_declarator::set_type_info(TYPE_QUALIFIER qualifier, TYPE_SPECIFIER specifier) {
+void sem_param_declaration::set_type_info(TYPE_QUALIFIER qualifier, TYPE_SPECIFIER specifier) {
   qualifier_ = qualifier;
   specifier_ = specifier;
 }
 
-void sem_param_declarator::set_is_pointer() { is_pointer_ = true; }
+void sem_param_declaration::set_is_pointer() { is_pointer_ = true; }
 
-void sem_param_declarator::add_dimension(sem_expression *expression) { dims_.push_front(expression); }
-
-std::string sem_param_declarator::to_string() const {
-  std::string out = "meta.param(";
-  out += qualifier_to_cstring(qualifier_);
-  out += ", ";
-  out += specifier_to_cstring(specifier_);
-  out += ", ";
-  out += (is_pointer_ ? "meta.type.pointer" : "meta.type.common");
-  out += ", ";
-  out += identifier_->to_string() + ", ";
-  out += "[";
-  for (sem_expression *const &dim : dims_) {
-    out += dim->to_string() + ", ";
+void sem_param_declaration::add_dimension(sem_expression *expression) {
+  if (dims_ == nullptr) {
+    dims_ = new std::list<sem_expression *>;
   }
-  out += "])";
+  dims_->push_front(expression);
+}
+
+std::string sem_param_declaration::to_string() const {
+  std::string out = "%" + identifier_->to_string();
+
+  out += " : ";
+  if (qualifier_ != TYPE_QUALIFIER::UNDEFINED) {
+    out += qualifier_to_cstring(qualifier_);
+    out += " ";
+  }
+  out += specifier_to_cstring(specifier_);
+
+  if (is_pointer_) {
+    out += "[]";
+  }
+
+  if (dims_ != nullptr and not dims_->empty()) {
+    out += '[';
+    std::list<sem_expression *>::iterator it = dims_->begin();
+    out += (*it)->to_string();
+    for (++it; it != dims_->end(); ++it) {
+      out += "x" + (*it)->to_string();
+    }
+    out += ']';
+  }
 
   return out;
 }
 
 sem_function_definition::sem_function_definition(TYPE_QUALIFIER qualifier, TYPE_SPECIFIER specifier,
-                                                 sem_identifier *identifier, sem_block *fake_params, sem_block *body)
+                                                 sem_identifier *identifier,
+                                                 std::list<sem_param_declaration *> *fake_params, sem_block *body)
     : qualifier_(qualifier), specifier_(specifier), identifier_(identifier), fake_params_(fake_params), body_(body) {}
 
 sem_function_definition::~sem_function_definition() {
@@ -170,6 +216,13 @@ sem_function_definition::~sem_function_definition() {
     identifier_ = nullptr;
   }
   if (fake_params_ != nullptr) {
+    std::list<sem_param_declaration *> &fparams = *fake_params_;
+    for (sem_param_declaration *&param : fparams) {
+      if (param != nullptr) {
+        delete param;
+        param = nullptr;
+      }
+    }
     delete fake_params_;
     fake_params_ = nullptr;
   }
@@ -180,28 +233,25 @@ sem_function_definition::~sem_function_definition() {
 }
 
 std::string sem_function_definition::to_string() const {
-  std::string out = "meta.function(";
-  out += qualifier_to_cstring(qualifier_);
-  out += ", ";
+  std::string out = "func.func";
+  out += " ";
+  out += "@" + identifier_->to_string();
+  out += "(";
+  if (not fake_params_->empty()) {
+    std::list<sem_param_declaration *>::iterator it = fake_params_->begin();
+    out += (*it)->to_string();
+    for (++it; it != fake_params_->end(); ++it) {
+      out += ", " + (*it)->to_string();
+    }
+  }
+  out += ") -> ";
+  if (qualifier_ != TYPE_QUALIFIER::UNDEFINED) {
+    out += qualifier_to_cstring(qualifier_);
+    out += " ";
+  }
   out += specifier_to_cstring(specifier_);
-  out += ", ";
-  out += identifier_->to_string() + ", ";
-  out += fake_params_->to_string() + ", ";
+  out += " ";
   out += body_->to_string();
-  out += ")";
 
   return out;
-}
-
-sem_simple_embedding::sem_simple_embedding(sem_block *block) : block_(block) {}
-
-sem_simple_embedding::~sem_simple_embedding() {
-  if (block_ != nullptr) {
-    delete block_;
-    block_ = nullptr;
-  }
-}
-
-std::string sem_simple_embedding::to_string() const {
-  return block_->to_string();
 }
