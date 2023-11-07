@@ -1,44 +1,88 @@
-#include "parser.h"
-#include "lexer.h"
+#include "parser/sem_ast.h"
+#include "config.h"
 
-#include <iostream>
+#include <getopt.h>
+#include <unistd.h>
 
-sem_region *sem_ast;
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
 
-int main(int argc, char *argv[]) {
-  if (argc < 2) {
-    return 0;
+configurations config;
+optimization_flags optflgs;
+
+[[noreturn]] static inline void usage(int status) {
+  fprintf(stderr, "cr [ -o <path> ] <file | options>\n");
+  exit(status);
+}
+
+static inline void parse_command_line_arguments(int argc, char **argv) {
+  while (true) {
+    int opt = getopt(argc, argv, "ho:O::S::");
+
+    if (opt == -1) break;
+
+    switch (opt) {
+      case 'h':
+        usage(0);
+
+      case 'o':
+        config.output_file = true;
+        config.output_file_path = optarg;
+        break;
+
+      case 'O':
+        config.optimization_level = optarg;
+        break;
+
+      case 'S': {
+        if (optarg == nullptr)
+          config.output_asm_code = true;
+
+        else if (strcmp(optarg, "asm") == 0)
+          config.output_asm_code = true;
+
+        else if (strcmp(optarg, "llvm") == 0)
+          config.output_llvm_ir = true;
+
+        else if (strcmp(optarg, "ast") == 0)
+          config.output_ast_tree = true;
+
+        else
+          fprintf(stderr, "illegel -S argument\n");
+      } break;
+    }
   }
-  char *buf = nullptr;
-  size_t buflen = 0;
 
-  FILE *fp = open_memstream(&buf, &buflen);
-  FILE *infp = fopen(argv[1], "r");
+  for (int idx = optind; idx < argc; ++idx)
+    config.input_file_paths.push_back(argv[idx]);
 
-  for (;;) {
-    char inbuf[BUFSIZ];
-    int rcnt = fread(inbuf, sizeof(char), BUFSIZ, infp);
-    if (rcnt == 0)
-      break;
-    fwrite(inbuf, sizeof(char), BUFSIZ, fp);
+  if (auto lvl = config.optimization_level; lvl == nullptr) {
+
+  } else if (strcmp(lvl, "1") == 0) {
+    optflgs.constant_folding = true;
+    optflgs.simple_inlining = true;
+    optflgs.tail_recursive_inlining = true;
+
   }
 
-  fclose(fp);
+  if (config.input_file_paths.size() > 1 and config.output_file)
+    fprintf(stderr, "cannot specify '-o' with multiple files\n");
+}
 
-  yyscan_t scanner;
-  if (yylex_init(&scanner) != 0) {
+int main(int argc, char **argv) {
+  parse_command_line_arguments(argc, argv);
+
+  if (int code = prepare_sem_ast_generator(); code != 0)
     exit(EXIT_FAILURE);
-  }
-  YY_BUFFER_STATE state = yy_scan_string(buf, scanner);
 
-  if (yyparse(scanner) != 0) {
+  for (const char *path : config.input_file_paths) {
+    if (int code = parse_file(path); code != 0)
+      exit(EXIT_FAILURE);
+  }
+
+  if (int code = destroy_sem_ast_generator(); code != 0)
     exit(EXIT_FAILURE);
-  }
-  yy_delete_buffer(state, scanner);
-  yylex_destroy(scanner);
 
-  free(buf);
-
-  std::cout << "top " << sem_ast->to_string() << std::endl;
   return 0;
 }
