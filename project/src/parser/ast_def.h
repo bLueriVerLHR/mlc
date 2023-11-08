@@ -306,7 +306,10 @@ public:
   sem_left_value(sem_identifier *identifier);
   virtual ~sem_left_value();
 
+  sem_identifier *identifier() const;
+  const std::list<sem_expression *> *dimensions() const;
   void add_dimension(sem_expression *expression);
+
 
   std::string to_string() const;
 };
@@ -331,6 +334,9 @@ public:
   sem_arith_constant(sem_constant *constant);
   virtual ~sem_arith_constant();
 
+  SEM_CONSTANT_TYPE type() const;
+  const std::any &value() const;
+
   std::string to_string() const;
 };
 
@@ -340,6 +346,8 @@ class sem_arith_left_value : public sem_expression {
 public:
   sem_arith_left_value(sem_left_value *left_value);
   virtual ~sem_arith_left_value();
+
+  sem_left_value *left_value() const;
 
   std::string to_string() const;
 };
@@ -364,6 +372,10 @@ public:
   sem_arith_binary(SEM_ARITH_BINARY type, sem_expression *left, sem_expression *right);
   virtual ~sem_arith_binary();
 
+  SEM_ARITH_BINARY type() const;
+  sem_expression *left() const;
+  sem_expression *right() const;
+
   std::string to_string() const;
 };
 
@@ -374,6 +386,9 @@ class sem_arith_unary : public sem_expression {
 public:
   sem_arith_unary(SEM_ARITH_UNARY type, sem_expression *expression);
   virtual ~sem_arith_unary();
+
+  SEM_ARITH_UNARY type() const;
+  sem_expression *expression() const;
 
   std::string to_string() const;
 };

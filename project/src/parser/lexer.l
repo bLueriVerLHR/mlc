@@ -60,6 +60,7 @@ ws      [ \t\v\n\f\r]
 "||"                  { return LEX_LOR; }
 "=="                  { return LEX_EQU; }
 "!="                  { return LEX_NEQ; }
+
 ";"|","|"["|"]"|"{"|"}"|"("|")"|"+"|"-"|"*"|"/"|"%"|"!"|">"|"<"|"="    { return yytext[0]; }
 
   /* identifier */

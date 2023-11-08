@@ -9,6 +9,10 @@ sem_arith_constant::~sem_arith_constant() {
   }
 }
 
+SEM_CONSTANT_TYPE sem_arith_constant::type() const { return constant_->type(); }
+
+const std::any &sem_arith_constant::value() const { return constant_->value(); }
+
 std::string sem_arith_constant::to_string() const { return constant_->to_string(); }
 
 sem_arith_binary::sem_arith_binary(SEM_ARITH_BINARY type, sem_expression *left, sem_expression *right)
@@ -58,9 +62,7 @@ sem_arith_left_value::~sem_arith_left_value() {
   }
 }
 
-std::string sem_arith_left_value::to_string() const {
-  return left_value_->to_string();
-}
+std::string sem_arith_left_value::to_string() const { return left_value_->to_string(); }
 
 sem_function_call::sem_function_call(sem_identifier *identifier, std::list<sem_expression *> *real_param)
     : identifier_(identifier), real_param_(real_param) {}
