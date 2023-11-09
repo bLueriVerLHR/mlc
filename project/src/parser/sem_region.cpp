@@ -6,6 +6,8 @@ void sem_region::add_operation(sem_operation *operation) {
   operations_.push_back(operation);
 }
 
+const std::list<sem_operation *> &sem_region::operations() { return operations_; }
+
 sem_region::~sem_region() {
   for (sem_operation *&operation : operations_) {
     if (operation == nullptr)

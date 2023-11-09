@@ -10,6 +10,8 @@ enum class SEM_CONSTANT_TYPE {
   DECIMAL_FLOAT,
   HEXADECIMAL_INTEGER,
   HEXADECIMAL_FLOAT,
+  FLOAT,
+  INT,
   CSTRING,
   ERROR,
 };
@@ -113,11 +115,17 @@ static inline const char *arith_to_cstring(SEM_ARITH_UNARY type) {
   return "unknow";
 }
 
+struct sem_context;
+class sem_visitor;
+
 class sem_constant {
   std::any value_;
   SEM_CONSTANT_TYPE type_;
 
 public:
+  sem_constant(const char *cstring);
+  sem_constant(long ival);
+  sem_constant(float fval);
   sem_constant(SEM_CONSTANT_TYPE type);
   sem_constant(const char *text, SEM_CONSTANT_TYPE type);
   virtual ~sem_constant();
@@ -145,6 +153,8 @@ public:
   sem_operation() = default;
   virtual ~sem_operation() = default;
 
+  virtual void simple_const_folding(sem_visitor *visitor, sem_context *ctx);
+
   virtual std::string to_string() const = 0;
 };
 
@@ -156,6 +166,7 @@ public:
   virtual ~sem_region();
 
   void add_operation(sem_operation *operation);
+  const std::list<sem_operation *> &operations();
 
   std::string to_string() const;
 };
@@ -180,6 +191,7 @@ public:
   virtual ~sem_init_list();
 
   void add_init_list(sem_init_list *init_list);
+  sem_expression *find_element(const std::list<sem_expression *> *dims_) const;
 
   std::string to_string() const;
 };
@@ -201,11 +213,12 @@ public:
   void set_init_list(sem_init_list *init_list);
   void set_is_global();
   void add_dimension(sem_expression *expression);
+  void simple_const_folding(sem_visitor *visitor, sem_context *ctx);
 
   std::string to_string() const;
 };
 
-class sem_param_declaration {
+class sem_param_declaration : public sem_operation {
   SEM_TYPE_QUALIFIER qualifier_;
   SEM_TYPE_SPECIFIER specifier_;
   sem_identifier *identifier_;
@@ -220,6 +233,7 @@ public:
   void set_type_info(SEM_TYPE_QUALIFIER qualifier, SEM_TYPE_SPECIFIER specifier);
   void set_is_pointer();
   void add_dimension(sem_expression *expression);
+  void simple_const_folding(sem_visitor *visitor, sem_context *ctx);
 
   std::string to_string() const;
 };
@@ -236,6 +250,8 @@ public:
                           std::list<sem_param_declaration *> *fake_params, sem_region *body);
   virtual ~sem_function_definition();
 
+  void simple_const_folding(sem_visitor *visitor, sem_context *ctx);
+
   std::string to_string() const;
 };
 
@@ -245,6 +261,8 @@ class sem_plain_block : public sem_operation {
 public:
   sem_plain_block(sem_region *block_);
   virtual ~sem_plain_block();
+
+  void simple_const_folding(sem_visitor *visitor, sem_context *ctx);
 
   std::string to_string() const;
 };

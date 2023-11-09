@@ -26,6 +26,14 @@ sem_init_list::~sem_init_list() {
 
 void sem_init_list::add_init_list(sem_init_list *init_list) { init_list_.push_back(init_list); }
 
+sem_expression *sem_init_list::find_element(const std::list<sem_expression *> *dims_) const {
+  if (dims_ == nullptr and is_expression_) {
+    return expression_;
+  }
+
+  return nullptr;
+}
+
 std::string sem_init_list::to_string() const {
   if (is_expression_) {
     return expression_->to_string();
@@ -112,7 +120,7 @@ void sem_declaration::add_dimension(sem_expression *expression) {
 }
 
 std::string sem_declaration::to_string() const {
-  std::string out = (is_global_ ? "@" : "%") + identifier_->to_string();
+  std::string out = identifier_->to_string();
 
   if (init_list_ != nullptr) {
     out += " = initializer ";
@@ -177,7 +185,7 @@ void sem_param_declaration::add_dimension(sem_expression *expression) {
 }
 
 std::string sem_param_declaration::to_string() const {
-  std::string out = "%" + identifier_->to_string();
+  std::string out = identifier_->to_string();
 
   out += " : ";
   if (qualifier_ != SEM_TYPE_QUALIFIER::UNDEFINED) {
@@ -369,7 +377,7 @@ void sem_left_value::add_dimension(sem_expression *expression) {
 }
 
 std::string sem_left_value::to_string() const {
-  std::string out = "%" + identifier_->to_string();
+  std::string out = identifier_->to_string();
 
   if (dims_ != nullptr and not dims_->empty()) {
     out += '[';

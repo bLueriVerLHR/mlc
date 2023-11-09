@@ -1,11 +1,35 @@
 #include "pass.h"
 
-simple_symbol::simple_symbol(bool is_constexpr, size_t idx, sem_init_list *init_list)
-    : is_constexpr_(is_constexpr), idx_(idx), init_list_(init_list) {}
+simple_symbol::simple_symbol(bool is_constexpr, size_t idx, const std::list<sem_expression *> *dimensions,
+                             const sem_init_list *init_list)
+    : is_constexpr_(is_constexpr), idx_(idx), dimensions_(dimensions), init_list_(init_list) {}
 
 bool simple_symbol::is_constexpr() const { return is_constexpr_; }
 
-simple_expression_result simple_symbol::get_value(const std::list<sem_expression *> *dimensions) const {
+simple_expression_result simple_symbol::get_value(const std::list<sem_expression *> *dimensions, sem_context &ctx) const {
+  if (is_constexpr_) {
+    if (dimensions_ == nullptr) {
+      if (dimensions != nullptr) {
+        return simple_expression_result();
+      }
+
+      sem_expression *expr = init_list_->find_element(dimensions);
+
+      if (expr != nullptr) {
+        return calculate_constexpr(expr, ctx);
+      }
+    } else {
+      if (dimensions == nullptr) {
+        return simple_expression_result();
+      }
+
+      sem_expression *expr = init_list_->find_element(dimensions);
+
+      if (expr != nullptr) {
+        return calculate_constexpr(expr, ctx);
+      }
+    }
+  }
   return simple_expression_result(0l);
 }
 
@@ -68,10 +92,16 @@ const simple_symbol *simple_symbol_table::find_symbol(const char *name) const {
   return &fnd->second;
 }
 
+void simple_symbol_table::add_symbol(bool is_constexpr, const char *name, const std::list<sem_expression *> *dimensions,
+                                     const sem_init_list *init_list) {
+  sym_map_.emplace(std::string(name), simple_symbol(is_constexpr, sym_idx_, dimensions, init_list));
+  sym_idx_ += 1;
+}
+
 simple_expression_result simple_symbol_table::get_left_value(sem_identifier *identifier,
                                                              const std::list<sem_expression *> *dimensions,
                                                              sem_context &ctx) const {
   const simple_symbol *sym = find_symbol(identifier->name());
 
-  return sym->get_value(dimensions);
+  return sym->get_value(dimensions, ctx);
 }

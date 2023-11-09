@@ -13,6 +13,12 @@
     }                                                                                                                  \
   } while (0)
 
+sem_constant::sem_constant(const char *cstring) : value_(cstring), type_(SEM_CONSTANT_TYPE::CSTRING) {}
+
+sem_constant::sem_constant(long ival) : value_(ival), type_(SEM_CONSTANT_TYPE::INT) {}
+
+sem_constant::sem_constant(float fval) : value_(fval), type_(SEM_CONSTANT_TYPE::FLOAT) {}
+
 sem_constant::sem_constant(SEM_CONSTANT_TYPE type) : value_(), type_(type) {
   switch (type_) {
   case SEM_CONSTANT_TYPE::OCTAL_INTEGER:
@@ -103,6 +109,14 @@ std::string sem_constant::to_string() const {
   case SEM_CONSTANT_TYPE::DECIMAL_FLOAT:
   case SEM_CONSTANT_TYPE::HEXADECIMAL_FLOAT: {
     return std::to_string(std::any_cast<double>(value_));
+  } break;
+
+  case SEM_CONSTANT_TYPE::INT: {
+    return std::to_string(std::any_cast<long>(value_));
+  } break;
+
+  case SEM_CONSTANT_TYPE::FLOAT: {
+    return std::to_string(std::any_cast<float>(value_));
   } break;
 
   case SEM_CONSTANT_TYPE::CSTRING: {

@@ -33,17 +33,17 @@ simple_expression_result simple_expression_result::operator+(const simple_expres
 
   case SER_TYPE::FLOAT:
     if (right.type == SER_TYPE::INT) {
-      return simple_expression_result(fval + ival);
+      return simple_expression_result(fval + right.ival);
     } else if (right.type == SER_TYPE::FLOAT) {
-      return simple_expression_result(fval + fval);
+      return simple_expression_result(fval + right.fval);
     }
     break;
 
   case SER_TYPE::INT:
     if (right.type == SER_TYPE::INT) {
-      return simple_expression_result(ival + ival);
+      return simple_expression_result(ival + right.ival);
     } else if (right.type == SER_TYPE::FLOAT) {
-      return simple_expression_result(ival + fval);
+      return simple_expression_result(ival + right.fval);
     }
     break;
   }
@@ -68,17 +68,17 @@ simple_expression_result simple_expression_result::operator-(const simple_expres
 
   case SER_TYPE::FLOAT:
     if (right.type == SER_TYPE::INT) {
-      return simple_expression_result(fval - ival);
+      return simple_expression_result(fval - right.ival);
     } else if (right.type == SER_TYPE::FLOAT) {
-      return simple_expression_result(fval - fval);
+      return simple_expression_result(fval - right.fval);
     }
     break;
 
   case SER_TYPE::INT:
     if (right.type == SER_TYPE::INT) {
-      return simple_expression_result(ival - ival);
+      return simple_expression_result(ival - right.ival);
     } else if (right.type == SER_TYPE::FLOAT) {
-      return simple_expression_result(ival - fval);
+      return simple_expression_result(ival - right.fval);
     }
     break;
   }
@@ -103,17 +103,17 @@ simple_expression_result simple_expression_result::operator*(const simple_expres
 
   case SER_TYPE::FLOAT:
     if (right.type == SER_TYPE::INT) {
-      return simple_expression_result(fval * ival);
+      return simple_expression_result(fval * right.ival);
     } else if (right.type == SER_TYPE::FLOAT) {
-      return simple_expression_result(fval * fval);
+      return simple_expression_result(fval * right.fval);
     }
     break;
 
   case SER_TYPE::INT:
     if (right.type == SER_TYPE::INT) {
-      return simple_expression_result(ival * ival);
+      return simple_expression_result(ival * right.ival);
     } else if (right.type == SER_TYPE::FLOAT) {
-      return simple_expression_result(ival * fval);
+      return simple_expression_result(ival * right.fval);
     }
     break;
   }
@@ -138,17 +138,17 @@ simple_expression_result simple_expression_result::operator/(const simple_expres
 
   case SER_TYPE::FLOAT:
     if (right.type == SER_TYPE::INT) {
-      return simple_expression_result(fval / ival);
+      return simple_expression_result(fval / right.ival);
     } else if (right.type == SER_TYPE::FLOAT) {
-      return simple_expression_result(fval / fval);
+      return simple_expression_result(fval / right.fval);
     }
     break;
 
   case SER_TYPE::INT:
     if (right.type == SER_TYPE::INT) {
-      return simple_expression_result(ival / ival);
+      return simple_expression_result(ival / right.ival);
     } else if (right.type == SER_TYPE::FLOAT) {
-      return simple_expression_result(ival / fval);
+      return simple_expression_result(ival / right.fval);
     }
     break;
   }
