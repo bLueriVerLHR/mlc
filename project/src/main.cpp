@@ -1,11 +1,11 @@
-#include <mlc/parser/sem_ast.h>
 #include <mlc/config.h>
+#include <mlc/parser/sem_ast.h>
 
 #include <getopt.h>
 #include <unistd.h>
 
-#include <cstdlib>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 
 configurations config;
@@ -20,37 +20,38 @@ static inline void parse_command_line_arguments(int argc, char **argv) {
   while (true) {
     int opt = getopt(argc, argv, "ho:O::S::");
 
-    if (opt == -1) break;
+    if (opt == -1)
+      break;
 
     switch (opt) {
-      case 'h':
-        usage(0);
+    case 'h':
+      usage(0);
 
-      case 'o':
-        config.output_file = true;
-        config.output_file_path = optarg;
-        break;
+    case 'o':
+      config.output_file = true;
+      config.output_file_path = optarg;
+      break;
 
-      case 'O':
-        config.optimization_level = optarg;
-        break;
+    case 'O':
+      config.optimization_level = optarg;
+      break;
 
-      case 'S': {
-        if (optarg == nullptr)
-          config.output_asm_code = true;
+    case 'S': {
+      if (optarg == nullptr)
+        config.output_asm_code = true;
 
-        else if (strcmp(optarg, "asm") == 0)
-          config.output_asm_code = true;
+      else if (strcmp(optarg, "asm") == 0)
+        config.output_asm_code = true;
 
-        else if (strcmp(optarg, "llvm") == 0)
-          config.output_llvm_ir = true;
+      else if (strcmp(optarg, "llvm") == 0)
+        config.output_llvm_ir = true;
 
-        else if (strcmp(optarg, "ast") == 0)
-          config.output_ast_tree = true;
+      else if (strcmp(optarg, "ast") == 0)
+        config.output_ast_tree = true;
 
-        else
-          fprintf(stderr, "illegel -S argument\n");
-      } break;
+      else
+        fprintf(stderr, "illegel -S argument\n");
+    } break;
     }
   }
 
@@ -63,7 +64,6 @@ static inline void parse_command_line_arguments(int argc, char **argv) {
     optflgs.constant_folding = true;
     optflgs.simple_inlining = true;
     optflgs.tail_recursive_inlining = true;
-
   }
 
   if (config.input_file_paths.size() > 1 and config.output_file)

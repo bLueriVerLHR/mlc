@@ -1075,57 +1075,57 @@ YY_RULE_SETUP
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 64 "lexer.l"
+#line 65 "lexer.l"
 { return yytext[0]; }
 	YY_BREAK
 /* identifier */
 case 26:
 YY_RULE_SETUP
-#line 68 "lexer.l"
+#line 69 "lexer.l"
 { yylval->identifier = new sem_identifier(yytext); return LEX_IDENTIFIER; }
 	YY_BREAK
 /* comments */
 case 27:
 YY_RULE_SETUP
-#line 72 "lexer.l"
+#line 73 "lexer.l"
 { BEGIN(COMMENT); }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 73 "lexer.l"
+#line 74 "lexer.l"
 { BEGIN(INITIAL); }
 	YY_BREAK
 case 29:
 /* rule 29 can match eol */
 YY_RULE_SETUP
-#line 74 "lexer.l"
+#line 75 "lexer.l"
 { fprintf(stderr, "unclosed comment\n"); }
 	YY_BREAK
 case YY_STATE_EOF(COMMENT):
-#line 75 "lexer.l"
+#line 76 "lexer.l"
 { fprintf(stderr, "unclosed comment\n"); }
 	YY_BREAK
 case 30:
 /* rule 30 can match eol */
 YY_RULE_SETUP
-#line 76 "lexer.l"
+#line 77 "lexer.l"
 { }
 	YY_BREAK
 /* white space */
 case 31:
 /* rule 31 can match eol */
 YY_RULE_SETUP
-#line 80 "lexer.l"
+#line 81 "lexer.l"
 { }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 81 "lexer.l"
+#line 82 "lexer.l"
 { fprintf(stderr, "unexpected charactor: %s\n", yytext); }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 83 "lexer.l"
+#line 84 "lexer.l"
 ECHO;
 	YY_BREAK
 #line 1131 "lexer.cpp"
@@ -2291,5 +2291,5 @@ void yyfree (void * ptr , yyscan_t yyscanner)
 
 #define YYTABLES_NAME "yytables"
 
-#line 83 "lexer.l"
+#line 84 "lexer.l"
 

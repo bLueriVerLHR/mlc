@@ -49,7 +49,10 @@ int parse_file(const char *file) {
     fwrite(tmp, sizeof(char), BUFSIZ, fp);
   }
 
+  fputc('\n', fp);
+  fflush(fp);
   fclose(fp);
+  yybuf[buflen - 1] = '\0';
 
   YY_BUFFER_STATE state = yy_scan_string(yybuf, scanner);
   if (yyparse(scanner) != 0)
@@ -57,7 +60,6 @@ int parse_file(const char *file) {
   yy_delete_buffer(state, scanner);
   free(yybuf);
 
-  std::cout << "top " << sem_ast->to_string() << std::endl;
   ast_forest.push_back(sem_ast);
   sem_ast = nullptr;
 

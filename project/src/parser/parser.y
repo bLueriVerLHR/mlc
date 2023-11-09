@@ -1,12 +1,16 @@
 %{
+
 #include <iostream>
 
 #include "parser.h"
 #include "lexer.h"
 
+#define YYINITDEPTH 10000
+
 int yyerror(YYLTYPE *yylloc, yyscan_t scanner, const char *msg) {
+  (void)yylloc;
   (void)scanner;
-  fprintf(stderr,"line %d, column %d: Error: %s\n", yylloc->first_line, yylloc->first_column, msg);
+  fprintf(stderr,"<file>:<line>:<column>: %s\n", msg);
   return 0;
 }
 

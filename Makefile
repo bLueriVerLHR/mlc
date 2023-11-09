@@ -16,7 +16,12 @@ TEST_CASE	?= fb
 
 $(shell mkdir -p $(PROJECT_BUILD_DIR))
 
+# for test and build
 .PHONY: all build parser clean run
+,PHONY: test-ast
+
+# for version control
+.PHONY: format push
 
 all: build
 
@@ -37,5 +42,18 @@ parser:
 clean:
 	rm -r $(PROJECT_BUILD_DIR)
 
-run: build
-	$(BINARY) $(TEST_DIR)/$(TEST_CASE).sy
+run: test-ast
+
+test-ast: build
+	$(BINARY) $(TEST_DIR)/$(TEST_CASE).sy -Sast -o $(TEST_DIR)/$(TEST_CASE).ast
+
+FORMAT_FILES	:= $(addprefix format/, $(PROJECT_SRC) $(PROJECT_INC))
+
+PROXY_WSL		:= ALL_PROXY=$(shell cat /etc/resolv.conf | grep nameserver | awk '{print $$2}'):7890
+PROXY 			:= $(PROXY_WSL)
+
+$(FORMAT_FILES): format/%:%
+	clang-format -i $<
+
+push: $(FORMAT_FILES)
+	$(PROXY) git push

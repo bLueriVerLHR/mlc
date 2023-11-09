@@ -45,7 +45,7 @@
 extern int yydebug;
 #endif
 /* "%code requires" blocks.  */
-#line 15 "parser.y"
+#line 19 "parser.y"
 
 #include <list>
 #include "ast_def.h"
@@ -93,7 +93,7 @@ typedef void *yyscan_t;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 35 "parser.y"
+#line 39 "parser.y"
 
   SEM_TYPE_SPECIFIER type_specifier;
   SEM_TYPE_QUALIFIER type_qualifier;

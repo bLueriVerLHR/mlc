@@ -69,19 +69,23 @@
 /* First part of user prologue.  */
 #line 1 "parser.y"
 
+
 #include <iostream>
 
 #include "parser.h"
 #include "lexer.h"
 
+#define YYINITDEPTH 10000
+
 int yyerror(YYLTYPE *yylloc, yyscan_t scanner, const char *msg) {
+  (void)yylloc;
   (void)scanner;
-  fprintf(stderr,"line %d, column %d: Error: %s\n", yylloc->first_line, yylloc->first_column, msg);
+  fprintf(stderr,"<file>:<line>:<column>: %s\n", msg);
   return 0;
 }
 
 
-#line 85 "parser.cpp"
+#line 89 "parser.cpp"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -567,15 +571,15 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   101,   101,   108,   119,   130,   135,   143,   154,   159,
-     167,   172,   179,   183,   190,   194,   199,   206,   210,   214,
-     218,   225,   229,   236,   240,   247,   252,   260,   268,   272,
-     279,   284,   289,   299,   312,   316,   320,   324,   328,   332,
-     336,   340,   344,   348,   352,   359,   366,   373,   377,   384,
-     388,   395,   399,   403,   410,   414,   418,   422,   426,   433,
-     437,   441,   448,   452,   456,   460,   467,   471,   475,   479,
-     483,   487,   494,   498,   502,   509,   513,   521,   526,   534,
-     538,   542,   549,   553
+       0,   105,   105,   112,   123,   134,   139,   147,   158,   163,
+     171,   176,   183,   187,   194,   198,   203,   210,   214,   218,
+     222,   229,   233,   240,   244,   251,   256,   264,   272,   276,
+     283,   288,   293,   303,   316,   320,   324,   328,   332,   336,
+     340,   344,   348,   352,   356,   363,   370,   377,   381,   388,
+     392,   399,   403,   407,   414,   418,   422,   426,   430,   437,
+     441,   445,   452,   456,   460,   464,   471,   475,   479,   483,
+     487,   491,   498,   502,   506,   513,   517,   525,   530,   538,
+     542,   546,   553,   557
 };
 #endif
 
@@ -1640,15 +1644,15 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* top_scope: translation_unit  */
-#line 102 "parser.y"
+#line 106 "parser.y"
   {
     sem_ast = (yyvsp[0].block);
   }
-#line 1648 "parser.cpp"
+#line 1652 "parser.cpp"
     break;
 
   case 3: /* translation_unit: declaration  */
-#line 109 "parser.y"
+#line 113 "parser.y"
   {
     (yyval.block) = new sem_region;
     std::list<sem_declaration *> &decls = *(yyvsp[0].declarations);
@@ -1659,11 +1663,11 @@ yyreduce:
     }
     delete (yyvsp[0].declarations);
   }
-#line 1663 "parser.cpp"
+#line 1667 "parser.cpp"
     break;
 
   case 4: /* translation_unit: translation_unit declaration  */
-#line 120 "parser.y"
+#line 124 "parser.y"
   {
     (yyval.block) = (yyvsp[-1].block);
     std::list<sem_declaration *> &decls = *(yyvsp[0].declarations);
@@ -1674,29 +1678,29 @@ yyreduce:
     }
     delete (yyvsp[0].declarations);
   }
-#line 1678 "parser.cpp"
+#line 1682 "parser.cpp"
     break;
 
   case 5: /* translation_unit: function_definition  */
-#line 131 "parser.y"
+#line 135 "parser.y"
   {
     (yyval.block) = new sem_region;
     (yyval.block)->add_operation((yyvsp[0].function_definition));
   }
-#line 1687 "parser.cpp"
+#line 1691 "parser.cpp"
     break;
 
   case 6: /* translation_unit: translation_unit function_definition  */
-#line 136 "parser.y"
+#line 140 "parser.y"
   {
     (yyval.block) = (yyvsp[-1].block);
     (yyval.block)->add_operation((yyvsp[0].function_definition));
   }
-#line 1696 "parser.cpp"
+#line 1700 "parser.cpp"
     break;
 
   case 7: /* declaration: type_qualifier type_specifier variable_definitions ';'  */
-#line 144 "parser.y"
+#line 148 "parser.y"
   {
     (yyval.declarations) = (yyvsp[-1].declarations);
     std::list<sem_declaration *> &decls = *(yyval.declarations);
@@ -1704,212 +1708,212 @@ yyreduce:
       decl->set_type_info((yyvsp[-3].type_qualifier), (yyvsp[-2].type_specifier));
     }
   }
-#line 1708 "parser.cpp"
+#line 1712 "parser.cpp"
     break;
 
   case 8: /* variable_definitions: variable_definition  */
-#line 155 "parser.y"
+#line 159 "parser.y"
   {
     (yyval.declarations) = new std::list<sem_declaration *>;
     (yyval.declarations)->push_back((yyvsp[0].declaration));
   }
-#line 1717 "parser.cpp"
+#line 1721 "parser.cpp"
     break;
 
   case 9: /* variable_definitions: variable_definitions ',' variable_definition  */
-#line 160 "parser.y"
+#line 164 "parser.y"
   {
     (yyval.declarations) = (yyvsp[-2].declarations);
     (yyval.declarations)->push_back((yyvsp[0].declaration));
   }
-#line 1726 "parser.cpp"
+#line 1730 "parser.cpp"
     break;
 
   case 10: /* variable_definition: declarator '=' initializer  */
-#line 168 "parser.y"
+#line 172 "parser.y"
   {
     (yyval.declaration) = (yyvsp[-2].declaration);
     (yyvsp[-2].declaration)->set_init_list((yyvsp[0].init_list));
   }
-#line 1735 "parser.cpp"
+#line 1739 "parser.cpp"
     break;
 
   case 11: /* variable_definition: declarator  */
-#line 173 "parser.y"
+#line 177 "parser.y"
   {
     (yyval.declaration) = (yyvsp[0].declaration);
   }
-#line 1743 "parser.cpp"
+#line 1747 "parser.cpp"
     break;
 
   case 12: /* declarator: declarator '[' expression ']'  */
-#line 180 "parser.y"
+#line 184 "parser.y"
   {
     (yyval.declaration)->add_dimension((yyvsp[-1].expression));
   }
-#line 1751 "parser.cpp"
+#line 1755 "parser.cpp"
     break;
 
   case 13: /* declarator: LEX_IDENTIFIER  */
-#line 184 "parser.y"
+#line 188 "parser.y"
   {
     (yyval.declaration) = new sem_declaration((yyvsp[0].identifier));
   }
-#line 1759 "parser.cpp"
+#line 1763 "parser.cpp"
     break;
 
   case 14: /* param_declarator: param_declarator '[' expression ']'  */
-#line 191 "parser.y"
+#line 195 "parser.y"
   {
     (yyval.param_declaration)->add_dimension((yyvsp[-1].expression));
   }
-#line 1767 "parser.cpp"
+#line 1771 "parser.cpp"
     break;
 
   case 15: /* param_declarator: LEX_IDENTIFIER '[' ']'  */
-#line 195 "parser.y"
+#line 199 "parser.y"
   {
     (yyval.param_declaration) = new sem_param_declaration((yyvsp[-2].identifier));
     (yyval.param_declaration)->set_is_pointer();
   }
-#line 1776 "parser.cpp"
+#line 1780 "parser.cpp"
     break;
 
   case 16: /* param_declarator: LEX_IDENTIFIER  */
-#line 200 "parser.y"
+#line 204 "parser.y"
   {
     (yyval.param_declaration) = new sem_param_declaration((yyvsp[0].identifier));
   }
-#line 1784 "parser.cpp"
+#line 1788 "parser.cpp"
     break;
 
   case 17: /* initializer: '{' '}'  */
-#line 207 "parser.y"
+#line 211 "parser.y"
   {
     (yyval.init_list) = new sem_init_list();
   }
-#line 1792 "parser.cpp"
+#line 1796 "parser.cpp"
     break;
 
   case 18: /* initializer: expression  */
-#line 211 "parser.y"
+#line 215 "parser.y"
   {
     (yyval.init_list) = new sem_init_list((yyvsp[0].expression));
   }
-#line 1800 "parser.cpp"
+#line 1804 "parser.cpp"
     break;
 
   case 19: /* initializer: '{' initializer_list '}'  */
-#line 215 "parser.y"
+#line 219 "parser.y"
   {
     (yyval.init_list) = (yyvsp[-1].init_list);
   }
-#line 1808 "parser.cpp"
+#line 1812 "parser.cpp"
     break;
 
   case 20: /* initializer: '{' initializer_list ',' '}'  */
-#line 219 "parser.y"
+#line 223 "parser.y"
   {
     (yyval.init_list) = (yyvsp[-2].init_list);
   }
-#line 1816 "parser.cpp"
+#line 1820 "parser.cpp"
     break;
 
   case 21: /* initializer_list: initializer  */
-#line 226 "parser.y"
+#line 230 "parser.y"
   {
     (yyval.init_list) = new sem_init_list((yyvsp[0].init_list));
   }
-#line 1824 "parser.cpp"
+#line 1828 "parser.cpp"
     break;
 
   case 22: /* initializer_list: initializer_list ',' initializer  */
-#line 230 "parser.y"
+#line 234 "parser.y"
   {
     (yyval.init_list)->add_init_list((yyvsp[0].init_list));
   }
-#line 1832 "parser.cpp"
+#line 1836 "parser.cpp"
     break;
 
   case 23: /* function_definition: type_qualifier type_specifier LEX_IDENTIFIER '(' function_fake_params ')' block  */
-#line 237 "parser.y"
+#line 241 "parser.y"
   {
     (yyval.function_definition) = new sem_function_definition((yyvsp[-6].type_qualifier), (yyvsp[-5].type_specifier), (yyvsp[-4].identifier), (yyvsp[-2].param_declarations), (yyvsp[0].block));
   }
-#line 1840 "parser.cpp"
+#line 1844 "parser.cpp"
     break;
 
   case 24: /* function_definition: type_qualifier type_specifier LEX_IDENTIFIER '(' ')' block  */
-#line 241 "parser.y"
+#line 245 "parser.y"
   {
     (yyval.function_definition) = new sem_function_definition((yyvsp[-5].type_qualifier), (yyvsp[-4].type_specifier), (yyvsp[-3].identifier), nullptr, (yyvsp[0].block));
   }
-#line 1848 "parser.cpp"
+#line 1852 "parser.cpp"
     break;
 
   case 25: /* function_fake_params: function_fake_param  */
-#line 248 "parser.y"
+#line 252 "parser.y"
   {
     (yyval.param_declarations) = new std::list<sem_param_declaration *>;
     (yyval.param_declarations)->push_back((yyvsp[0].param_declaration));
   }
-#line 1857 "parser.cpp"
+#line 1861 "parser.cpp"
     break;
 
   case 26: /* function_fake_params: function_fake_params ',' function_fake_param  */
-#line 253 "parser.y"
+#line 257 "parser.y"
   {
     (yyval.param_declarations) = (yyvsp[-2].param_declarations);
     (yyval.param_declarations)->push_back((yyvsp[0].param_declaration));
   }
-#line 1866 "parser.cpp"
+#line 1870 "parser.cpp"
     break;
 
   case 27: /* function_fake_param: type_qualifier type_specifier param_declarator  */
-#line 261 "parser.y"
+#line 265 "parser.y"
   {
     (yyval.param_declaration) = (yyvsp[0].param_declaration);
     (yyval.param_declaration)->set_type_info((yyvsp[-2].type_qualifier), (yyvsp[-1].type_specifier));
   }
-#line 1875 "parser.cpp"
+#line 1879 "parser.cpp"
     break;
 
   case 28: /* block: '{' block_items '}'  */
-#line 269 "parser.y"
+#line 273 "parser.y"
   {
     (yyval.block) = (yyvsp[-1].block);
   }
-#line 1883 "parser.cpp"
+#line 1887 "parser.cpp"
     break;
 
   case 29: /* block: '{' '}'  */
-#line 273 "parser.y"
+#line 277 "parser.y"
   {
     (yyval.block) = new sem_region;
   }
-#line 1891 "parser.cpp"
+#line 1895 "parser.cpp"
     break;
 
   case 30: /* block_items: statement  */
-#line 280 "parser.y"
+#line 284 "parser.y"
   {
     (yyval.block) = new sem_region;
     (yyval.block)->add_operation((yyvsp[0].operation));
   }
-#line 1900 "parser.cpp"
+#line 1904 "parser.cpp"
     break;
 
   case 31: /* block_items: block_items statement  */
-#line 285 "parser.y"
+#line 289 "parser.y"
   {
     (yyval.block) = (yyvsp[-1].block);
     (yyval.block)->add_operation((yyvsp[0].operation));
   }
-#line 1909 "parser.cpp"
+#line 1913 "parser.cpp"
     break;
 
   case 32: /* block_items: declaration  */
-#line 290 "parser.y"
+#line 294 "parser.y"
   {
     (yyval.block) = new sem_region;
     std::list<sem_declaration *> &decls = *(yyvsp[0].declarations);
@@ -1919,11 +1923,11 @@ yyreduce:
     }
     delete (yyvsp[0].declarations);
   }
-#line 1923 "parser.cpp"
+#line 1927 "parser.cpp"
     break;
 
   case 33: /* block_items: block_items declaration  */
-#line 300 "parser.y"
+#line 304 "parser.y"
   {
     (yyval.block) = (yyvsp[-1].block);
     std::list<sem_declaration *> &decls = *(yyvsp[0].declarations);
@@ -1933,414 +1937,414 @@ yyreduce:
     }
     delete (yyvsp[0].declarations);
   }
-#line 1937 "parser.cpp"
+#line 1941 "parser.cpp"
     break;
 
   case 34: /* statement: ';'  */
-#line 313 "parser.y"
+#line 317 "parser.y"
   {
     (yyval.operation) = nullptr;
   }
-#line 1945 "parser.cpp"
+#line 1949 "parser.cpp"
     break;
 
   case 35: /* statement: expression ';'  */
-#line 317 "parser.y"
+#line 321 "parser.y"
   {
     (yyval.operation) = (yyvsp[-1].expression);
   }
-#line 1953 "parser.cpp"
+#line 1957 "parser.cpp"
     break;
 
   case 36: /* statement: left_value '=' expression ';'  */
-#line 321 "parser.y"
+#line 325 "parser.y"
   {
     (yyval.operation) = new sem_assignment((yyvsp[-3].left_value), (yyvsp[-1].expression));
   }
-#line 1961 "parser.cpp"
+#line 1965 "parser.cpp"
     break;
 
   case 37: /* statement: block  */
-#line 325 "parser.y"
+#line 329 "parser.y"
   {
     (yyval.operation) = new sem_plain_block((yyvsp[0].block));
   }
-#line 1969 "parser.cpp"
+#line 1973 "parser.cpp"
     break;
 
   case 38: /* statement: LEX_IF '(' condition ')' statement  */
-#line 329 "parser.y"
+#line 333 "parser.y"
   {
     (yyval.operation) = new sem_branch((yyvsp[-2].expression), (yyvsp[0].operation));
   }
-#line 1977 "parser.cpp"
+#line 1981 "parser.cpp"
     break;
 
   case 39: /* statement: LEX_IF '(' condition ')' statement LEX_ELSE statement  */
-#line 333 "parser.y"
+#line 337 "parser.y"
   {
     (yyval.operation) = new sem_branch((yyvsp[-4].expression), (yyvsp[-2].operation), (yyvsp[0].operation));
   }
-#line 1985 "parser.cpp"
+#line 1989 "parser.cpp"
     break;
 
   case 40: /* statement: LEX_WHILE '(' condition ')' statement  */
-#line 337 "parser.y"
+#line 341 "parser.y"
   {
     (yyval.operation) = new sem_loop((yyvsp[-2].expression), (yyvsp[0].operation));
   }
-#line 1993 "parser.cpp"
+#line 1997 "parser.cpp"
     break;
 
   case 41: /* statement: LEX_BREAK ';'  */
-#line 341 "parser.y"
+#line 345 "parser.y"
   {
     (yyval.operation) = new sem_break;
   }
-#line 2001 "parser.cpp"
+#line 2005 "parser.cpp"
     break;
 
   case 42: /* statement: LEX_CONTINUE ';'  */
-#line 345 "parser.y"
+#line 349 "parser.y"
   {
     (yyval.operation) = new sem_continue;
   }
-#line 2009 "parser.cpp"
+#line 2013 "parser.cpp"
     break;
 
   case 43: /* statement: LEX_RETURN ';'  */
-#line 349 "parser.y"
+#line 353 "parser.y"
   {
     (yyval.operation) = new sem_return;
   }
-#line 2017 "parser.cpp"
+#line 2021 "parser.cpp"
     break;
 
   case 44: /* statement: LEX_RETURN expression ';'  */
-#line 353 "parser.y"
+#line 357 "parser.y"
   {
     (yyval.operation) = new sem_return((yyvsp[-1].expression));
   }
-#line 2025 "parser.cpp"
+#line 2029 "parser.cpp"
     break;
 
   case 45: /* condition: lor_expression  */
-#line 360 "parser.y"
+#line 364 "parser.y"
   {
     (yyval.expression) = (yyvsp[0].expression);
   }
-#line 2033 "parser.cpp"
+#line 2037 "parser.cpp"
     break;
 
   case 46: /* expression: add_expression  */
-#line 367 "parser.y"
+#line 371 "parser.y"
   {
     (yyval.expression) = (yyvsp[0].expression);
   }
-#line 2041 "parser.cpp"
+#line 2045 "parser.cpp"
     break;
 
   case 47: /* lor_expression: land_expression  */
-#line 374 "parser.y"
+#line 378 "parser.y"
   {
     (yyval.expression) = (yyvsp[0].expression);
   }
-#line 2049 "parser.cpp"
+#line 2053 "parser.cpp"
     break;
 
   case 48: /* lor_expression: lor_expression LEX_LOR land_expression  */
-#line 378 "parser.y"
+#line 382 "parser.y"
   {
     (yyval.expression) = new sem_arith_binary(SEM_ARITH_BINARY::LOR, (yyvsp[-2].expression), (yyvsp[0].expression));
   }
-#line 2057 "parser.cpp"
+#line 2061 "parser.cpp"
     break;
 
   case 49: /* land_expression: equ_expression  */
-#line 385 "parser.y"
+#line 389 "parser.y"
   {
     (yyval.expression) = (yyvsp[0].expression);
   }
-#line 2065 "parser.cpp"
+#line 2069 "parser.cpp"
     break;
 
   case 50: /* land_expression: land_expression LEX_LAND equ_expression  */
-#line 389 "parser.y"
+#line 393 "parser.y"
   {
     (yyval.expression) = new sem_arith_binary(SEM_ARITH_BINARY::LAND, (yyvsp[-2].expression), (yyvsp[0].expression));
   }
-#line 2073 "parser.cpp"
+#line 2077 "parser.cpp"
     break;
 
   case 51: /* equ_expression: rel_expression  */
-#line 396 "parser.y"
+#line 400 "parser.y"
   {
     (yyval.expression) = (yyvsp[0].expression);
   }
-#line 2081 "parser.cpp"
+#line 2085 "parser.cpp"
     break;
 
   case 52: /* equ_expression: equ_expression LEX_EQU rel_expression  */
-#line 400 "parser.y"
+#line 404 "parser.y"
   {
     (yyval.expression) = new sem_arith_binary(SEM_ARITH_BINARY::EQU, (yyvsp[-2].expression), (yyvsp[0].expression));
   }
-#line 2089 "parser.cpp"
+#line 2093 "parser.cpp"
     break;
 
   case 53: /* equ_expression: equ_expression LEX_NEQ rel_expression  */
-#line 404 "parser.y"
+#line 408 "parser.y"
   {
     (yyval.expression) = new sem_arith_binary(SEM_ARITH_BINARY::NEQ, (yyvsp[-2].expression), (yyvsp[0].expression));
   }
-#line 2097 "parser.cpp"
+#line 2101 "parser.cpp"
     break;
 
   case 54: /* rel_expression: add_expression  */
-#line 411 "parser.y"
+#line 415 "parser.y"
   {
     (yyval.expression) = (yyvsp[0].expression);
   }
-#line 2105 "parser.cpp"
+#line 2109 "parser.cpp"
     break;
 
   case 55: /* rel_expression: rel_expression LEX_GEQ add_expression  */
-#line 415 "parser.y"
+#line 419 "parser.y"
   {
     (yyval.expression) = new sem_arith_binary(SEM_ARITH_BINARY::GEQ, (yyvsp[-2].expression), (yyvsp[0].expression));
   }
-#line 2113 "parser.cpp"
+#line 2117 "parser.cpp"
     break;
 
   case 56: /* rel_expression: rel_expression LEX_LEQ add_expression  */
-#line 419 "parser.y"
+#line 423 "parser.y"
   {
     (yyval.expression) = new sem_arith_binary(SEM_ARITH_BINARY::LEQ, (yyvsp[-2].expression), (yyvsp[0].expression));
   }
-#line 2121 "parser.cpp"
+#line 2125 "parser.cpp"
     break;
 
   case 57: /* rel_expression: rel_expression '>' add_expression  */
-#line 423 "parser.y"
+#line 427 "parser.y"
   {
     (yyval.expression) = new sem_arith_binary(SEM_ARITH_BINARY::GTH, (yyvsp[-2].expression), (yyvsp[0].expression));
   }
-#line 2129 "parser.cpp"
+#line 2133 "parser.cpp"
     break;
 
   case 58: /* rel_expression: rel_expression '<' add_expression  */
-#line 427 "parser.y"
+#line 431 "parser.y"
   {
     (yyval.expression) = new sem_arith_binary(SEM_ARITH_BINARY::LTH, (yyvsp[-2].expression), (yyvsp[0].expression));
   }
-#line 2137 "parser.cpp"
+#line 2141 "parser.cpp"
     break;
 
   case 59: /* add_expression: mul_expression  */
-#line 434 "parser.y"
+#line 438 "parser.y"
   {
     (yyval.expression) = (yyvsp[0].expression);
   }
-#line 2145 "parser.cpp"
+#line 2149 "parser.cpp"
     break;
 
   case 60: /* add_expression: add_expression '+' mul_expression  */
-#line 438 "parser.y"
+#line 442 "parser.y"
   {
     (yyval.expression) = new sem_arith_binary(SEM_ARITH_BINARY::ADD, (yyvsp[-2].expression), (yyvsp[0].expression));
   }
-#line 2153 "parser.cpp"
+#line 2157 "parser.cpp"
     break;
 
   case 61: /* add_expression: add_expression '-' mul_expression  */
-#line 442 "parser.y"
+#line 446 "parser.y"
   {
     (yyval.expression) = new sem_arith_binary(SEM_ARITH_BINARY::SUB, (yyvsp[-2].expression), (yyvsp[0].expression));
   }
-#line 2161 "parser.cpp"
+#line 2165 "parser.cpp"
     break;
 
   case 62: /* mul_expression: unary_expression  */
-#line 449 "parser.y"
+#line 453 "parser.y"
   {
     (yyval.expression) = (yyvsp[0].expression);
   }
-#line 2169 "parser.cpp"
+#line 2173 "parser.cpp"
     break;
 
   case 63: /* mul_expression: unary_expression '*' mul_expression  */
-#line 453 "parser.y"
+#line 457 "parser.y"
   {
     (yyval.expression) = new sem_arith_binary(SEM_ARITH_BINARY::MUL, (yyvsp[-2].expression), (yyvsp[0].expression));
   }
-#line 2177 "parser.cpp"
+#line 2181 "parser.cpp"
     break;
 
   case 64: /* mul_expression: unary_expression '/' mul_expression  */
-#line 457 "parser.y"
+#line 461 "parser.y"
   {
     (yyval.expression) = new sem_arith_binary(SEM_ARITH_BINARY::DIV, (yyvsp[-2].expression), (yyvsp[0].expression));
   }
-#line 2185 "parser.cpp"
+#line 2189 "parser.cpp"
     break;
 
   case 65: /* mul_expression: unary_expression '%' mul_expression  */
-#line 461 "parser.y"
+#line 465 "parser.y"
   {
     (yyval.expression) = new sem_arith_binary(SEM_ARITH_BINARY::MOD, (yyvsp[-2].expression), (yyvsp[0].expression));
   }
-#line 2193 "parser.cpp"
+#line 2197 "parser.cpp"
     break;
 
   case 66: /* unary_expression: primary_expression  */
-#line 468 "parser.y"
+#line 472 "parser.y"
   {
     (yyval.expression) = (yyvsp[0].expression);
   }
-#line 2201 "parser.cpp"
+#line 2205 "parser.cpp"
     break;
 
   case 67: /* unary_expression: LEX_IDENTIFIER '(' ')'  */
-#line 472 "parser.y"
+#line 476 "parser.y"
   {
     (yyval.expression) = new sem_function_call((yyvsp[-2].identifier), nullptr);
   }
-#line 2209 "parser.cpp"
+#line 2213 "parser.cpp"
     break;
 
   case 68: /* unary_expression: LEX_IDENTIFIER '(' function_real_params ')'  */
-#line 476 "parser.y"
+#line 480 "parser.y"
   {
     (yyval.expression) = new sem_function_call((yyvsp[-3].identifier), (yyvsp[-1].expressions));
   }
-#line 2217 "parser.cpp"
+#line 2221 "parser.cpp"
     break;
 
   case 69: /* unary_expression: '+' unary_expression  */
-#line 480 "parser.y"
+#line 484 "parser.y"
   {
     (yyval.expression) = (yyvsp[0].expression);
   }
-#line 2225 "parser.cpp"
+#line 2229 "parser.cpp"
     break;
 
   case 70: /* unary_expression: '-' unary_expression  */
-#line 484 "parser.y"
+#line 488 "parser.y"
   {
     (yyval.expression) = new sem_arith_unary(SEM_ARITH_UNARY::NEG, (yyvsp[0].expression));
   }
-#line 2233 "parser.cpp"
+#line 2237 "parser.cpp"
     break;
 
   case 71: /* unary_expression: '!' unary_expression  */
-#line 488 "parser.y"
+#line 492 "parser.y"
   {
     (yyval.expression) = new sem_arith_unary(SEM_ARITH_UNARY::LNOT, (yyvsp[0].expression));
   }
-#line 2241 "parser.cpp"
+#line 2245 "parser.cpp"
     break;
 
   case 72: /* primary_expression: '(' expression ')'  */
-#line 495 "parser.y"
+#line 499 "parser.y"
   {
     (yyval.expression) = (yyvsp[-1].expression);
   }
-#line 2249 "parser.cpp"
+#line 2253 "parser.cpp"
     break;
 
   case 73: /* primary_expression: left_value  */
-#line 499 "parser.y"
+#line 503 "parser.y"
   {
     (yyval.expression) = new sem_arith_left_value((yyvsp[0].left_value));
   }
-#line 2257 "parser.cpp"
+#line 2261 "parser.cpp"
     break;
 
   case 74: /* primary_expression: LEX_CONSTANT  */
-#line 503 "parser.y"
+#line 507 "parser.y"
   {
     (yyval.expression) = new sem_arith_constant((yyvsp[0].constant));
   }
-#line 2265 "parser.cpp"
+#line 2269 "parser.cpp"
     break;
 
   case 75: /* left_value: LEX_IDENTIFIER  */
-#line 510 "parser.y"
+#line 514 "parser.y"
   {
     (yyval.left_value) = new sem_left_value((yyvsp[0].identifier));
   }
-#line 2273 "parser.cpp"
+#line 2277 "parser.cpp"
     break;
 
   case 76: /* left_value: left_value '[' expression ']'  */
-#line 514 "parser.y"
+#line 518 "parser.y"
   {
     (yyval.left_value) = (yyvsp[-3].left_value);
     (yyval.left_value)->add_dimension((yyvsp[-1].expression));
   }
-#line 2282 "parser.cpp"
+#line 2286 "parser.cpp"
     break;
 
   case 77: /* function_real_params: expression  */
-#line 522 "parser.y"
+#line 526 "parser.y"
   {
     (yyval.expressions) = new std::list<sem_expression *>;
     (yyval.expressions)->push_back((yyvsp[0].expression));
   }
-#line 2291 "parser.cpp"
+#line 2295 "parser.cpp"
     break;
 
   case 78: /* function_real_params: function_real_params ',' expression  */
-#line 527 "parser.y"
+#line 531 "parser.y"
   {
     (yyval.expressions) = (yyvsp[-2].expressions);
     (yyval.expressions)->push_back((yyvsp[0].expression));
   }
-#line 2300 "parser.cpp"
+#line 2304 "parser.cpp"
     break;
 
   case 79: /* type_specifier: LEX_INT  */
-#line 535 "parser.y"
+#line 539 "parser.y"
   {
     (yyval.type_specifier) = SEM_TYPE_SPECIFIER::INT;
   }
-#line 2308 "parser.cpp"
+#line 2312 "parser.cpp"
     break;
 
   case 80: /* type_specifier: LEX_FLOAT  */
-#line 539 "parser.y"
+#line 543 "parser.y"
   {
     (yyval.type_specifier) = SEM_TYPE_SPECIFIER::FLOAT;
   }
-#line 2316 "parser.cpp"
+#line 2320 "parser.cpp"
     break;
 
   case 81: /* type_specifier: LEX_VOID  */
-#line 543 "parser.y"
+#line 547 "parser.y"
   {
     (yyval.type_specifier) = SEM_TYPE_SPECIFIER::VOID;
   }
-#line 2324 "parser.cpp"
+#line 2328 "parser.cpp"
     break;
 
   case 82: /* type_qualifier: %empty  */
-#line 550 "parser.y"
+#line 554 "parser.y"
   {
     (yyval.type_qualifier) = SEM_TYPE_QUALIFIER::UNDEFINED;
   }
-#line 2332 "parser.cpp"
+#line 2336 "parser.cpp"
     break;
 
   case 83: /* type_qualifier: LEX_CONST  */
-#line 554 "parser.y"
+#line 558 "parser.y"
   {
     (yyval.type_qualifier) = SEM_TYPE_QUALIFIER::CONST;
   }
-#line 2340 "parser.cpp"
+#line 2344 "parser.cpp"
     break;
 
 
-#line 2344 "parser.cpp"
+#line 2348 "parser.cpp"
 
       default: break;
     }
@@ -2569,4 +2573,4 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 559 "parser.y"
+#line 563 "parser.y"
