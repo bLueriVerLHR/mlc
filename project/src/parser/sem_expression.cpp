@@ -29,6 +29,12 @@ sem_arith_binary::~sem_arith_binary() {
   }
 }
 
+SEM_ARITH_BINARY sem_arith_binary::type() const { return type_; }
+
+sem_expression *sem_arith_binary::left() const { return left_; }
+
+sem_expression *sem_arith_binary::right() const { return right_; }
+
 std::string sem_arith_binary::to_string() const {
   std::string out = arith_to_cstring(type_);
   out += " " + left_->to_string() + " " + right_->to_string();
@@ -46,6 +52,10 @@ sem_arith_unary::~sem_arith_unary() {
   }
 }
 
+SEM_ARITH_UNARY sem_arith_unary::type() const { return type_; }
+
+sem_expression *sem_arith_unary::expression() const { return expression_; }
+
 std::string sem_arith_unary::to_string() const {
   std::string out = arith_to_cstring(type_);
   out += " " + expression_->to_string();
@@ -60,6 +70,10 @@ sem_arith_left_value::~sem_arith_left_value() {
     delete left_value_;
     left_value_ = nullptr;
   }
+}
+
+sem_left_value *sem_arith_left_value::left_value() const {
+  return left_value_;
 }
 
 std::string sem_arith_left_value::to_string() const { return left_value_->to_string(); }

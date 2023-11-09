@@ -1,5 +1,5 @@
-#include "parser/sem_ast.h"
-#include "config.h"
+#include <mlc/parser/sem_ast.h>
+#include <mlc/config.h>
 
 #include <getopt.h>
 #include <unistd.h>
@@ -57,7 +57,7 @@ static inline void parse_command_line_arguments(int argc, char **argv) {
   for (int idx = optind; idx < argc; ++idx)
     config.input_file_paths.push_back(argv[idx]);
 
-  if (auto lvl = config.optimization_level; lvl == nullptr) {
+  if (char *lvl = config.optimization_level; lvl == nullptr) {
 
   } else if (strcmp(lvl, "1") == 0) {
     optflgs.constant_folding = true;

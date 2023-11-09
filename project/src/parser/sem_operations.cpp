@@ -357,6 +357,10 @@ sem_left_value::~sem_left_value() {
   }
 }
 
+sem_identifier *sem_left_value::identifier() const { return identifier_; }
+
+const std::list<sem_expression *> *sem_left_value::dimensions() const { return dims_; }
+
 void sem_left_value::add_dimension(sem_expression *expression) {
   if (dims_ == nullptr) {
     dims_ = new std::list<sem_expression *>;

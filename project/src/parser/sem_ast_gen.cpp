@@ -1,7 +1,8 @@
+#include <mlc/parser/sem_ast.h>
+
 #include "ast_def.h"
 #include "lexer.h"
 #include "parser.h"
-#include "parser/sem_ast.h"
 
 #include <iostream>
 #include <vector>
@@ -73,4 +74,4 @@ int destroy() {
   return yylex_destroy(scanner);
 }
 
-}
+} // namespace sem
