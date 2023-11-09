@@ -310,7 +310,6 @@ public:
   const std::list<sem_expression *> *dimensions() const;
   void add_dimension(sem_expression *expression);
 
-
   std::string to_string() const;
 };
 

@@ -10,7 +10,10 @@
 int yyerror(YYLTYPE *yylloc, yyscan_t scanner, const char *msg) {
   (void)yylloc;
   (void)scanner;
-  fprintf(stderr,"<file>:<line>:<column>: %s\n", msg);
+  fprintf(stderr, "<file>:<line>:<column>: %s:"
+                  "\n\t%s\n",
+                  msg,
+                  yyget_text(scanner));
   return 0;
 }
 

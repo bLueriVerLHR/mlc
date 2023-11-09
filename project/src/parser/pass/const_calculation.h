@@ -1,5 +1,3 @@
 #include "visitor.h"
 
-class const_calculation {
-
-};
+class const_calculation {};

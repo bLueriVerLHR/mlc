@@ -7,10 +7,10 @@ namespace mlir {
 class operation {
 
 protected:
-    size_t opidx_;
-    const char *dialect_;
-    const char *name_;
-    std::vector<size_t> arguments_;
+  size_t opidx_;
+  const char *dialect_;
+  const char *name_;
+  std::vector<size_t> arguments_;
 
 public:
   operation();

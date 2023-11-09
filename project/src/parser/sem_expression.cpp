@@ -72,9 +72,7 @@ sem_arith_left_value::~sem_arith_left_value() {
   }
 }
 
-sem_left_value *sem_arith_left_value::left_value() const {
-  return left_value_;
-}
+sem_left_value *sem_arith_left_value::left_value() const { return left_value_; }
 
 std::string sem_arith_left_value::to_string() const { return left_value_->to_string(); }
 

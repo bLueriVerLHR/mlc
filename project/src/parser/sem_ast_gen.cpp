@@ -11,7 +11,6 @@ sem_region *sem_ast;
 
 std::vector<sem_region *> ast_forest;
 
-static char *yybuf = nullptr;
 static yyscan_t scanner = nullptr;
 
 namespace sem {
@@ -25,40 +24,14 @@ int prepare() {
 }
 
 int parse_file(const char *file) {
-  size_t buflen = 0;
+  FILE *fp = fopen(file, "r");
+  YY_BUFFER_STATE state = yy_create_buffer(fp, YY_BUF_SIZE, scanner);
+  yy_switch_to_buffer(state, scanner);
 
-  FILE *fp = open_memstream(&yybuf, &buflen);
-  if (fp == nullptr) {
-    fprintf(stderr, "%s\n", strerror(errno));
-    return EXIT_FAILURE;
-  }
-
-  FILE *infp = fopen(file, "r");
-  if (infp == nullptr) {
-    fprintf(stderr, "%s\n", strerror(errno));
-    return EXIT_FAILURE;
-  }
-
-  for (;;) {
-    char tmp[BUFSIZ];
-    int n = fread(tmp, sizeof(char), BUFSIZ, infp);
-    if (n == 0) {
-      fclose(infp);
-      break;
-    }
-    fwrite(tmp, sizeof(char), BUFSIZ, fp);
-  }
-
-  fputc('\n', fp);
-  fflush(fp);
-  fclose(fp);
-  yybuf[buflen - 1] = '\0';
-
-  YY_BUFFER_STATE state = yy_scan_string(yybuf, scanner);
   if (yyparse(scanner) != 0)
     return EXIT_FAILURE;
   yy_delete_buffer(state, scanner);
-  free(yybuf);
+  fclose(fp);
 
   ast_forest.push_back(sem_ast);
   sem_ast = nullptr;

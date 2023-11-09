@@ -1,11 +1,11 @@
-#include <mlc/parser/sem_ast.h>
 #include <mlc/config.h>
+#include <mlc/parser/sem_ast.h>
 
 #include "pass.h"
 
 #include <climits>
-#include <string>
 #include <fstream>
+#include <string>
 
 extern std::vector<sem_region *> ast_forest;
 

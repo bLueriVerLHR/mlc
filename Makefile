@@ -55,5 +55,7 @@ PROXY 			:= $(PROXY_WSL)
 $(FORMAT_FILES): format/%:%
 	clang-format -i $<
 
-push: $(FORMAT_FILES)
+format: $(FORMAT_FILES)
+
+push:
 	$(PROXY) git push
