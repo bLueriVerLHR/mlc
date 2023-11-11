@@ -153,7 +153,7 @@ public:
   sem_operation() = default;
   virtual ~sem_operation() = default;
 
-  virtual void simple_const_folding(sem_visitor *visitor, sem_context *ctx);
+  virtual void simple_tagging(sem_visitor *visitor, sem_context *ctx);
 
   virtual std::string to_string() const = 0;
 };
@@ -213,7 +213,7 @@ public:
   void set_init_list(sem_init_list *init_list);
   void set_is_global();
   void add_dimension(sem_expression *expression);
-  void simple_const_folding(sem_visitor *visitor, sem_context *ctx);
+  void simple_tagging(sem_visitor *visitor, sem_context *ctx);
 
   std::string to_string() const;
 };
@@ -233,7 +233,7 @@ public:
   void set_type_info(SEM_TYPE_QUALIFIER qualifier, SEM_TYPE_SPECIFIER specifier);
   void set_is_pointer();
   void add_dimension(sem_expression *expression);
-  void simple_const_folding(sem_visitor *visitor, sem_context *ctx);
+  void simple_tagging(sem_visitor *visitor, sem_context *ctx);
 
   std::string to_string() const;
 };
@@ -250,7 +250,7 @@ public:
                           std::list<sem_param_declaration *> *fake_params, sem_region *body);
   virtual ~sem_function_definition();
 
-  void simple_const_folding(sem_visitor *visitor, sem_context *ctx);
+  void simple_tagging(sem_visitor *visitor, sem_context *ctx);
 
   std::string to_string() const;
 };
@@ -262,7 +262,7 @@ public:
   sem_plain_block(sem_region *block_);
   virtual ~sem_plain_block();
 
-  void simple_const_folding(sem_visitor *visitor, sem_context *ctx);
+  void simple_tagging(sem_visitor *visitor, sem_context *ctx);
 
   std::string to_string() const;
 };

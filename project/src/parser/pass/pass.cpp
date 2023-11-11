@@ -2,7 +2,7 @@
 #include <mlc/parser/sem_ast.h>
 
 #include "pass.h"
-#include "constexpr_calculation.h"
+#include "tagging.h"
 
 #include <climits>
 #include <fstream>
@@ -18,10 +18,10 @@ void pass() {
   sem_context ctx;
   ctx.symtbl = symtbl.get();
 
-  constexpr_calculation *cstexpr_calcu = new constexpr_calculation(&ctx);
+  std::unique_ptr<symbol_tagging> tagger = std::make_unique<symbol_tagging>(&ctx);
 
   for (sem_region *region : ast_forest) {
-    cstexpr_calcu->visit(region);
+    tagger->visit(region);
   }
 
   if (config.output_file and config.output_ast_tree) {
@@ -29,6 +29,12 @@ void pass() {
     for (sem_region *region : ast_forest) {
       fs << region->to_string() << std::endl;
     }
+
+#ifndef NDEBUG
+  // print symbol table information
+  symtbl->print(fs);
+#endif
+
   }
 }
 

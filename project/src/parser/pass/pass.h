@@ -24,27 +24,44 @@ struct simple_expression_result {
   simple_expression_result(float val) : fval(val), type(SER_TYPE::FLOAT) {}
   simple_expression_result(const char *val) : cstring(val), type(SER_TYPE::CSTRING) {}
 
-  simple_expression_result operator-() const;
-  simple_expression_result operator+(const simple_expression_result &right) const;
-  simple_expression_result operator-(const simple_expression_result &right) const;
-  simple_expression_result operator*(const simple_expression_result &right) const;
-  simple_expression_result operator/(const simple_expression_result &right) const;
-  simple_expression_result operator%(const simple_expression_result &right) const;
+  [[nodiscard("expression result lost")]] simple_expression_result operator-() const;
+
+  [[nodiscard("expression result lost")]] simple_expression_result
+  operator+(const simple_expression_result &right) const;
+
+  [[nodiscard("expression result lost")]] simple_expression_result
+  operator-(const simple_expression_result &right) const;
+
+  [[nodiscard("expression result lost")]] simple_expression_result
+  operator*(const simple_expression_result &right) const;
+
+  [[nodiscard("expression result lost")]] simple_expression_result
+  operator/(const simple_expression_result &right) const;
+
+  [[nodiscard("expression result lost")]] simple_expression_result
+  operator%(const simple_expression_result &right) const;
 };
 
 simple_expression_result calculate_constexpr(sem_expression *expr, sem_context &ctx);
 
 class simple_symbol {
+  bool is_global_;
   bool is_constexpr_;
   size_t idx_;
   const std::list<sem_expression *> *dimensions_;
   const sem_init_list *init_list_;
 
 public:
-  simple_symbol(bool is_constexpr, size_t idx, const std::list<sem_expression *> *dimensions, const sem_init_list *init_list);
+  simple_symbol(bool is_constexpr, size_t idx, const std::list<sem_expression *> *dimensions,
+                const sem_init_list *init_list, bool is_global = false);
 
   bool is_constexpr() const;
-  simple_expression_result get_value(const std::list<sem_expression *> *dimensions, sem_context &ctx) const;
+  bool is_global() const;
+  size_t idx() const;
+  const sem_init_list *init_list() const;
+
+  [[nodiscard("expression result lost")]] simple_expression_result
+  get_value(const std::list<sem_expression *> *dimensions, sem_context &ctx) const;
 };
 
 class simple_symbol_table {
@@ -62,14 +79,19 @@ public:
   simple_symbol_table(simple_symbol_table *father);
 
   simple_symbol_table *father() const;
-  simple_symbol_table *make_child();
+
+  [[nodiscard("child pointer lost")]] simple_symbol_table *make_child();
+
   simple_symbol *find_symbol(const char *name);
   const simple_symbol *find_symbol(const char *name) const;
+
   void add_symbol(bool is_constexpr, const char *name, const std::list<sem_expression *> *dimensions,
                   const sem_init_list *init_list);
 
-  simple_expression_result get_left_value(sem_identifier *identifier, const std::list<sem_expression *> *dimensions,
-                                          sem_context &ctx) const;
+  [[nodiscard("left value lost")]] simple_expression_result
+  get_left_value(sem_identifier *identifier, const std::list<sem_expression *> *dimensions, sem_context &ctx) const;
+
+  void print(std::ostream &os) const;
 };
 
 struct sem_context {
