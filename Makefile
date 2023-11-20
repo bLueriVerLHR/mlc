@@ -14,38 +14,83 @@ BINARY				:= $(PROJECT_BUILD_DIR)/$(PROJECT_NAME)
 TEST_DIR	:= test
 TEST_CASE	?= fb
 
+CLANG			:= $(shell which clang)
+CLANGXX			:= $(shell which clang++)
+CCACHE			:= $(shell which ccache)
+NINJA			:= $(shell which ninja)
+
+# set compile info
+
+CC				:= $(CLANG)
+CXX				:= $(CLANGXX)
+
+ifeq ($(NINJA),)
+CMAKE_BUILDER	:= 
+else
+CMAKE_BUILDER	:= -G Ninja
+endif
+
+# make dir
 $(shell mkdir -p $(PROJECT_BUILD_DIR))
 
-# for test and build
-.PHONY: all build parser clean run
-,PHONY: test-ast
-
-# for version control
-.PHONY: format push
+# build binary
+.PHONY: all build debug release clean
 
 all: build
 
-build:
-	cmake -S . -B $(PROJECT_BUILD_DIR) \
-		-DMANUAL=ON \
+build: debug
+
+debug:
+	cmake \
+		-S . -B $(PROJECT_BUILD_DIR) \
+		$(CMAKE_BUILDER) \
+		-DMANUAL:BOOL=TRUE \
 		-DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE \
-		-DCMAKE_C_COMPILER:FILEPATH=`which clang` \
-		-DCMAKE_CXX_COMPILER:FILEPATH=`which clang++`
+		-DCMAKE_BUILD_TYPE:STRING=Debug \
+		-DCMAKE_C_COMPILER:FILEPATH=$(CC) \
+		-DCMAKE_CXX_COMPILER:FILEPATH=$(CXX) \
+		-DCMAKE_C_COMPILER_LAUNCHER:FILEPATH=$(CCACHE) \
+		-DCMAKE_CXX_COMPILER_LAUNCHER:FILEPATH=$(CCACHE)
 	cmake --build $(PROJECT_BUILD_DIR) -j$(NPROC)
 
-.ONESHELL:
-parser: 
-	cd project/src/parser
-	flex lexer.l
-	bison parser.y # -Wcounterexamples
+release:
+	cmake \
+		-S . -B $(PROJECT_BUILD_DIR) \
+		$(CMAKE_BUILDER) \
+		-DMANUAL:BOOL=TRUE \
+		-DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE \
+		-DCMAKE_BUILD_TYPE:STRING=Release \
+		-DCMAKE_C_COMPILER:FILEPATH=$(CC) \
+		-DCMAKE_CXX_COMPILER:FILEPATH=$(CXX) \
+		-DCMAKE_C_COMPILER_LAUNCHER:FILEPATH=$(CCACHE) \
+		-DCMAKE_CXX_COMPILER_LAUNCHER:FILEPATH=$(CCACHE)
+	cmake --build $(PROJECT_BUILD_DIR) -j$(NPROC)
 
 clean:
 	rm -r $(PROJECT_BUILD_DIR)
 
-run: test-ast
+# test binary
+.PHONY: run test-ast
+
+run: release
+	$(BINARY) $(TEST_DIR)/$(TEST_CASE).sy -Sast -o $(TEST_DIR)/$(TEST_CASE).ast
+
+test: test-ast
 
 test-ast: build
 	$(BINARY) $(TEST_DIR)/$(TEST_CASE).sy -Sast -o $(TEST_DIR)/$(TEST_CASE).ast
+
+# build parser
+.PHONY: parser
+
+.ONESHELL:
+parser:
+	cd project/src/parser
+	flex lexer.l
+	bison parser.y # -Wcounterexamples
+
+# formatter and git
+.PHONY: format push
 
 FORMAT_FILES	:= $(addprefix format/, $(PROJECT_SRC) $(PROJECT_INC))
 

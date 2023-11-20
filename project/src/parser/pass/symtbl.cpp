@@ -14,7 +14,8 @@ size_t simple_symbol::idx() const { return idx_; }
 
 const sem_init_list *simple_symbol::init_list() const { return init_list_; }
 
-simple_expression_result simple_symbol::get_value(const std::list<sem_expression *> *dimensions, sem_context &ctx) const {
+simple_expression_result simple_symbol::get_value(const std::list<sem_expression *> *dimensions,
+                                                  sem_context &ctx) const {
   if (is_constexpr_) {
     if (dimensions_ == nullptr) {
       if (dimensions != nullptr) {
@@ -102,7 +103,8 @@ const simple_symbol *simple_symbol_table::find_symbol(const char *name) const {
 
 void simple_symbol_table::add_symbol(bool is_constexpr, const char *name, const std::list<sem_expression *> *dimensions,
                                      const sem_init_list *init_list) {
-  std::pair<std::unordered_map<std::string, simple_symbol>::iterator, bool> &&result = sym_map_.emplace(std::string(name), simple_symbol(is_constexpr, sym_idx_, dimensions, init_list));
+  std::pair<std::unordered_map<std::string, simple_symbol>::iterator, bool> &&result =
+      sym_map_.emplace(std::string(name), simple_symbol(is_constexpr, sym_idx_, dimensions, init_list));
   if (not result.second) {
     fprintf(stderr, "multiple definition\n");
     exit(EXIT_FAILURE);

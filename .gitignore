@@ -1,12 +1,20 @@
+# source
+*.l.cpp
+*.l.h
+*.y.cpp
+*.y.h
+
+# debug
 *.s
 *.S
-*.o
 *.ast
 *.mlir
 
+# binary
 *.exe
 *.out
+*.elf
 
+# folder
 .vscode/
-
 build/

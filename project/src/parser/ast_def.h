@@ -3,6 +3,7 @@
 #include <any>
 #include <list>
 #include <string>
+#include <vector>
 
 enum class SEM_CONSTANT_TYPE {
   OCTAL_INTEGER,
@@ -410,4 +411,6 @@ public:
   std::string to_string() const;
 };
 
-extern sem_region *sem_ast;
+extern std::vector<sem_region *> ast_forest;
+
+static inline void add_ast(sem_region *region) { ast_forest.push_back(region); }

@@ -2,17 +2,16 @@
 
 #include <iostream>
 
-#include "parser.h"
-#include "lexer.h"
+#include "parser.y.h"
+#include "lexer.l.h"
 
 #define YYINITDEPTH 10000
 
 int yyerror(YYLTYPE *yylloc, yyscan_t scanner, const char *msg) {
-  (void)yylloc;
-  (void)scanner;
-  fprintf(stderr, "<file>:<line>:<column>: %s:"
+  fprintf(stderr, "%s:%d:%d: %s:"
                   "\n\t%s\n",
-                  msg,
+                  (const char *)yyget_extra(scanner),
+                  yylloc->first_line, yylloc->first_column, msg,
                   yyget_text(scanner));
   return 0;
 }
@@ -30,8 +29,8 @@ typedef void *yyscan_t;
 
 }
 
-%output "parser.cpp"
-%defines "parser.h"
+%output "parser.y.cpp"
+%defines "parser.y.h"
 
 %define api.pure full
 %define parse.error verbose
@@ -107,7 +106,7 @@ typedef void *yyscan_t;
 top_scope:
   translation_unit
   {
-    sem_ast = $1;
+    add_ast($1);
   }
   ;
 

@@ -6,5 +6,6 @@ int c[12 + a * 2] = {1, 2};
 
 int main() {
   int r[12 * a] = {};
-  return a;
+  return a; /* dsafgjsa
+  */
 }

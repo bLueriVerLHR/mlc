@@ -1,9 +1,20 @@
 %top{
 #include "ast_def.h"
-#include "parser.h"
+#include "parser.y.h"
+
+#define YY_USER_ACTION do {                   \
+  yylloc->first_column = yylloc->last_column; \
+  yylloc->last_column += strlen(yytext);      \
+} while (0);
+
+#define YY_NEWLINE_ACTION do {                    \
+  yylloc->first_line += 1;                        \
+  yylloc->last_line += 1;                         \
+  yylloc->first_column = yylloc->last_column = 1; \
+} while (0);
 }
 
-%option outfile="lexer.cpp" header-file="lexer.h"
+%option outfile="lexer.l.cpp" header-file="lexer.l.h"
 %option noinput nounput
 %option reentrant noyywrap never-interactive nounistd
 %option bison-bridge bison-locations
@@ -22,7 +33,8 @@ dexp    ([eE][+-]?{dec}+)
 hexp    ([pP][+-]?{hex}+)
 fsuf    [fFlL]
 isuf    (([uU](l|L|ll|LL)?)|((l|L|ll|LL)[uU]?))
-ws      [ \t\v\n\f\r]
+newline \r?\n
+ws      [ \t\v\f]
 
 %%
 
@@ -54,6 +66,7 @@ ws      [ \t\v\n\f\r]
 "return"        { return LEX_RETURN; }
 
   /* punctuator*/
+
 ">="                  { return LEX_GEQ; }
 "<="                  { return LEX_LEQ; }
 "&&"                  { return LEX_LAND; }
@@ -71,12 +84,14 @@ ws      [ \t\v\n\f\r]
 
 "/*"                    { BEGIN(COMMENT); }
 <COMMENT>"*/"           { BEGIN(INITIAL); }
-<COMMENT>([^*]|\n)+|.   { fprintf(stderr, "unclosed comment\n"); }
 <COMMENT><<EOF>>        { fprintf(stderr, "unclosed comment\n"); }
-"//".*\n                { }
+<COMMENT>{newline}      { YY_NEWLINE_ACTION }
+<COMMENT>.              { }
+"//".*{newline}         { YY_NEWLINE_ACTION }
 
   /* white space */
 
+{newline}           { YY_NEWLINE_ACTION }
 {ws}                { }
 .                   { fprintf(stderr, "unexpected charactor: %s\n", yytext); }
 
