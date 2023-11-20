@@ -16,9 +16,8 @@
 
 %option outfile="lexer.l.cpp" header-file="lexer.l.h"
 %option noinput nounput
-%option reentrant noyywrap never-interactive nounistd
+%option reentrant noyywrap never-interactive nounistd nodefault
 %option bison-bridge bison-locations
-%option yylineno
 
 %x COMMENT
 

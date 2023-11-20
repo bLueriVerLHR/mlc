@@ -17,8 +17,8 @@ namespace sem {
 
 int parse_file(const char *file) {
   if (int code = yylex_init(&scanner); code != 0) {
-    fprintf(stderr, "scanner initialize failed, code : %d", code);
-    return EXIT_FAILURE;
+    fprintf(stderr, "scanner initialize failed, code : %d\n", code);
+    return code;
   }
 
   FILE *fp = fopen(file, "r");
@@ -26,8 +26,8 @@ int parse_file(const char *file) {
   yy_switch_to_buffer(state, scanner);
 
   yyset_extra((void *)file, scanner);
-  if (yyparse(scanner) != 0)
-    return EXIT_FAILURE;
+  if (int code = yyparse(scanner); code != 0)
+    return code;
 
   yy_delete_buffer(state, scanner);
   fclose(fp);

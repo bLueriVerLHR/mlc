@@ -8,11 +8,9 @@
 #define YYINITDEPTH 10000
 
 int yyerror(YYLTYPE *yylloc, yyscan_t scanner, const char *msg) {
-  fprintf(stderr, "%s:%d:%d: %s:"
-                  "\n\t%s\n",
+  fprintf(stderr, "%s:%d:%d: %s\n",
                   (const char *)yyget_extra(scanner),
-                  yylloc->first_line, yylloc->first_column, msg,
-                  yyget_text(scanner));
+                  yylloc->first_line, yylloc->first_column, msg);
   return 0;
 }
 
