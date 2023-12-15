@@ -70,10 +70,8 @@ static inline void parse_command_line_arguments(int argc, char **argv) {
     fprintf(stderr, "cannot specify '-o' with multiple files\n");
 }
 
-void destroy_all() { sem::destroy(); }
 
 int main(int argc, char **argv) {
-  atexit(destroy_all);
   parse_command_line_arguments(argc, argv);
 
   for (const char *path : config.input_file_paths) {
@@ -82,6 +80,8 @@ int main(int argc, char **argv) {
   }
 
   sem::pass();
+
+  sem::destroy();
 
   return 0;
 }

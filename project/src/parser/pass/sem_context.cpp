@@ -1,7 +1,7 @@
 #include "pass.h"
 
 void sem_context::enter_block() {
-  simple_symbol_table *child = symtbl->make_child();
+  sem_symbol_table *child = symtbl->make_child();
   if (child == nullptr) {
     fprintf(stderr, "make new symbol table failed\n");
     exit(EXIT_FAILURE);

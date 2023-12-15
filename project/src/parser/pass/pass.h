@@ -64,23 +64,23 @@ public:
   get_value(const std::list<sem_expression *> *dimensions, sem_context &ctx) const;
 };
 
-class simple_symbol_table {
+class sem_symbol_table {
   size_t sym_idx_;
   std::unordered_map<std::string, simple_symbol> sym_map_;
-  simple_symbol_table *father_;
-  std::vector<std::unique_ptr<simple_symbol_table>> children_;
+  sem_symbol_table *father_;
+  std::vector<std::unique_ptr<sem_symbol_table>> children_;
 
-  simple_symbol *find_symbol(const char *, simple_symbol_table *father);
-  const simple_symbol *find_symbol(const char *, simple_symbol_table *father) const;
+  simple_symbol *find_symbol(const char *, sem_symbol_table *father);
+  const simple_symbol *find_symbol(const char *, sem_symbol_table *father) const;
 
 public:
-  simple_symbol_table();
+  sem_symbol_table();
 
-  simple_symbol_table(simple_symbol_table *father);
+  sem_symbol_table(sem_symbol_table *father);
 
-  simple_symbol_table *father() const;
+  sem_symbol_table *father() const;
 
-  [[nodiscard("child pointer lost")]] simple_symbol_table *make_child();
+  [[nodiscard("child pointer lost")]] sem_symbol_table *make_child();
 
   simple_symbol *find_symbol(const char *name);
   const simple_symbol *find_symbol(const char *name) const;
@@ -95,7 +95,7 @@ public:
 };
 
 struct sem_context {
-  simple_symbol_table *symtbl;
+  sem_symbol_table *symtbl;
 
   void enter_block();
 
