@@ -1,20 +1,2 @@
-# source
-*.l.cpp
-*.l.h
-*.y.cpp
-*.y.h
-
-# debug
-*.s
-*.S
-*.ast
-*.mlir
-
-# binary
-*.exe
-*.out
-*.elf
-
-# folder
+target/
 .vscode/
-build/
