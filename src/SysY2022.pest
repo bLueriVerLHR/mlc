@@ -1,0 +1,114 @@
+//! pest for SysY2022
+
+WHITESPACE = _{ " " | "\t" | NEWLINE }
+COMMENT = _{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" | "//" ~ (!"\n" ~ ANY)* }
+
+/// ``` identifier-nondigit ::= (_|{alpha}) ```
+identifier_nondigit = @{ "_" | ASCII_ALPHA }
+
+/// ``` identifier ::= ({identifier-nondigit})({identifier-nondigit}|{digit})* ```
+identifier = @{ identifier_nondigit ~ (identifier_nondigit | ASCII_DIGIT)* }
+
+/// ``` decimal-const ::= {nonzero-digit}{digit}* ```
+decimal_const = @{ ASCII_NONZERO_DIGIT ~ (ASCII_DIGIT)* }
+
+/// ``` octal-const ::= 0{octal-digit}* ```
+octal_const = @{ "0" ~ (ASCII_OCT_DIGIT)* }
+
+/// ``` hexadecimal-prefix ::= 0x|0X ```
+hexadecimal_prefix = @{ "0x" | "0X" }
+
+/// ``` hexadecimal-const ::= {hexadecimal-prefix}{hexadecimal-digit}+ ```
+hexadecimal_const = @{ hexadecimal_prefix ~ (ASCII_HEX_DIGIT)+ }
+
+decimal_exponent = @{ ("e" | "E") ~ ("+" | "-")? ~ (ASCII_DIGIT)+}
+
+hexadecimal_exponent = @{ ("p" | "P") ~ ("+" | "-")? ~ (ASCII_HEX_DIGIT)+}
+
+decimal_float = @{
+    (ASCII_DIGIT)+ ~ decimal_exponent |
+    (ASCII_DIGIT)* ~ "." ~ (ASCII_DIGIT)+ ~ (decimal_exponent)? |
+    (ASCII_DIGIT)+ ~ "." ~ (decimal_exponent)?
+}
+
+hexadecimal_float = @{
+    hexadecimal_prefix ~ (ASCII_HEX_DIGIT)* ~ "." ~ (ASCII_HEX_DIGIT)+ ~ (hexadecimal_exponent)? |
+    hexadecimal_prefix ~ (ASCII_HEX_DIGIT)+ ~ (".")? ~ (hexadecimal_exponent)?
+}
+
+/// SysY2022 Syntax
+
+CompUnit = { (Decl | FuncDef)+ }
+
+Decl = { ConstDecl | VarDecl }
+
+ConstDecl = { "const" ~ BType ~ ConstDef ~ ("," ~ ConstDef)* ~ ";" }
+
+BType = { "int" | "float" }
+
+ConstDef = { identifier ~ ("[" ~ ConstExp ~ "]")* ~ "=" ~ ConstInitVal }
+
+ConstInitVal = { ConstExp | ("{" ~ (ConstInitVal ~ ("," ~ ConstInitVal)*)? ~"}") }
+
+VarDecl = { BType ~ VarDef ~ ("," ~ VarDef)* ~ ";"}
+
+VarDef = { identifier ~ ("[" ~ ConstExp ~ "]")* ~ ("=" ~ InitVal)? }
+
+InitVal = { Exp | ("{" ~ (InitVal ~ ("," ~ InitVal)*)? ~"}") }
+
+FuncDef = { FuncType ~ identifier ~ "(" ~ (FuncFParams)? ~ ")" ~ Block }
+
+FuncType = { "void" | "int" | "float" }
+
+FuncFParams = { FuncFParam ~ ("," ~ FuncFParam)* }
+
+FuncFParam = { BType ~ identifier ~ ("[" ~ "]" ~ ("[" ~ Exp ~ "]")*)? }
+
+Block = { "{" ~ (BlockItem)* ~ "}" }
+
+BlockItem = { Decl | Stmt }
+
+Stmt = {
+    (LVal ~ "=" ~ Exp ~ ";") |
+    ((Exp)? ~ ";") |
+    Block |
+    ("if" ~ "(" ~ Cond ~ ")" ~ Stmt ~ ("else" ~ Stmt)?) |
+    ("while" ~ "(" ~ Cond ~ ")" ~ Stmt) |
+    ("break" ~ ";") |
+    ("continue" ~ ";") |
+    ("return" ~ (Exp)? ~ ";")
+}
+
+Exp = { AddExp }
+
+ConstExp = { AddExp }
+
+Cond = { LOrExp }
+
+LVal = { identifier ~ ("[" ~ Exp ~ "]")* }
+
+PrimaryExp = { Number | LVal | ("(" ~ Exp ~ ")") }
+
+Number = { IntConst | FloatConst }
+
+IntConst = { decimal_const | octal_const | hexadecimal_const }
+
+FloatConst = { decimal_float | hexadecimal_float }
+
+UnaryExp = { PrimaryExp | (identifier ~ "(" ~ (FuncRParams)? ~ ")") | (UnaryOp ~ UnaryExp) }
+
+UnaryOp = { "+" | "-" | "!" }
+
+FuncRParams = { Exp ~ ("," ~ Exp)* }
+
+MulExp = { UnaryExp ~ (("*" | "/" | "%") ~ UnaryExp)* }
+
+AddExp = { MulExp ~ (("+" | "-") ~ MulExp)* }
+
+RelExp = { AddExp ~ ((">" | "<" | ">=" | "<=") ~ AddExp)* }
+
+EqExp = { RelExp ~ (("==" | "!=") ~ RelExp)* }
+
+LAndExp = { EqExp ~ ("&&" ~ EqExp)* }
+
+LOrExp = { LAndExp ~ ("||" ~ LAndExp)* }
